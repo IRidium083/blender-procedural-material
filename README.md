@@ -1,5 +1,11 @@
 # Worn painted metal
 
+Additional material: [textured plastic / hard rubber grip](textured_grip/README.md),
+with two presets, a separate scene, and a preview.
+
+Additional material: [slightly used phosphated gun steel](phosphated_gun_steel/README.md),
+with its own script, scene, and preview in a separate folder.
+
 Procedural shader-node material for Blender 5.2 with chipped paint, exposed
 steel, convex edge wear, accumulated dust, and crossing surface scratches.
 
