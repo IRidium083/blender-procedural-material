@@ -1,57 +1,32 @@
-# Worn painted metal
+# Procedural materials
 
-Procedural shader-node material for Blender 5.2 with chipped paint, exposed
-steel, convex edge wear, accumulated dust, and crossing surface scratches.
+Blender 5.2 shader materials with editable node groups, no image textures required.
 
-![Cycles preview with sharp edges, scratches, and recessed dust](recessed_metal_cycles.png)
+| Material | Files | Preview |
+| --- | --- | --- |
+| Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | [Cycles](worn_painted_metal/recessed_metal_cycles.png) |
+| Machined aluminum | [Guide and controls](machined_aluminum/README.md) | [Cycles](machined_aluminum/machined_aluminum_preview.png) |
 
-In Blender 5.2, select your mesh, open `worn_painted_metal.py` in the Text Editor,
-and Run Script. Adjust the material's group inputs in the Shader Editor.
-No image textures or UV unwrap are required. Running normally only assigns the
-material; the preview option also adjusts geometry modifiers, lights and camera.
+Each material folder contains its generator, saved `.blend`, render previews,
+and test script. Open its `.blend` to inspect or append the material, or open
+the generator in Blender's Text Editor and run it with a mesh selected.
+Keep this folder structure when running generators.
 
-Both Cycles and Eevee can render this material. Cycles is recommended for the
-geometry-dependent effects. Eevee AO is approximate and view-dependent; it may
-miss hidden geometry. The shader avoids the Cycles-only Bevel and Pointiness
-features. See Blender's [AO node documentation](https://docs.blender.org/manual/en/latest/render/shader_nodes/input/ao.html).
+Shared root files:
 
-| Control | Effect |
-| --- | --- |
-| Wear | Random paint chips and scratches |
-| Edge Wear | Additional exposed steel at convex corners; zero disables it |
-| Edge Width | Inside AO search distance, controlling the edge wear band |
-| Dust Amount | Matte, nonmetallic dust in sheltered creases; zero disables it |
-| Dust Distance | Outside AO search distance, controlling accumulation spread |
-| Dust Color | Accumulated dust tint |
-| Scratch Amount | Two crossing layers of surface scratches, independent of Wear |
-| Scratch Scale | Scratch frequency; higher values produce finer scratches |
-| Scratch Depth | Additional incised scratch bump depth |
-| Pattern Scale | Object-space chip, scratch and grain frequency |
-| Relief | Recessed paint chip bump depth |
+- `test.blend`: reusable base scene for generating previews.
+- `preview_utils.py`: common studio lights, camera placement, and render settings.
+- `.gitignore` and `.gitattributes`: repository settings.
 
-Edge Width and Dust Distance are scene-space distances, independent of Pattern
-Scale. Defaults suit a roughly two-unit object. Use consistent/applied object
-scale, outward normals and solid geometry for inside AO. Very thin walls and
-nearby surfaces can also affect AO: these are proximity masks, not exact edge
-angle classification. Dust needs real concave geometry or contact surfaces;
-shader bump alone cannot create AO creases. The preview bevel is optional.
-The preview also includes a solid rail on top with unbeveled 90-degree edges,
-so sharp-edge wear can be compared with the rounded cube edges. Scratches
-expose steel and affect bump and roughness; set Scratch Amount to zero to
-disable them, or Scratch Depth to zero to remove their additional bump.
-
-To regenerate the simple cube preview:
+Run these commands from this project root in PowerShell:
 
 ```powershell
-& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' -b test.blend --python-exit-code 1 -P worn_painted_metal.py -- --preview --render
+$blender = 'C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe'
+& $blender --factory-startup -b test.blend --python-exit-code 1 -P machined_aluminum/machined_aluminum.py -- --preview --render
+& $blender --factory-startup -b machined_aluminum/machined_aluminum.blend --python-exit-code 1 -P machined_aluminum/test_material.py
+& $blender --factory-startup -b worn_painted_metal/worn_painted_metal.blend --python-exit-code 1 -P worn_painted_metal/test_material.py
 ```
 
-To test a recessed cube with both renderers and an effects-disabled comparison:
-
-```powershell
-& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' -b test.blend --python-exit-code 1 -P test_material.py
-```
-
-The test writes `recessed_metal_cycles.png`, `recessed_metal_eevee.png`, and
-`recessed_metal_clean.png`, and saves the recessed sample as
-`worn_painted_metal.blend`. It leaves `test.blend` untouched.
+Preview generation adjusts the sample's bevel, lights, and camera. Painted-metal
+testing updates its saved scene and renders Cycles, Eevee, and a clean comparison.
+Aluminum testing renders Eevee without changing the saved Cycles scene.

@@ -13,6 +13,8 @@ import argparse
 from pathlib import Path
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import bpy
 from mathutils import Vector
 
@@ -46,9 +48,7 @@ def make_material():
     socket("Dust Amount", "NodeSocketFloat", 0.8, 0, 1)
     socket("Dust Distance", "NodeSocketFloat", 0.3, 0.001, 10)
     socket("Dust Color", "NodeSocketColor", (0.24, 0.18, 0.105, 1))
-    socket("Scratch Amount", "NodeSocketFloat", 0.85, 0, 1)
-    socket("Scratch Scale", "NodeSocketFloat", 1.0, 0.01, 20)
-    socket("Scratch Depth", "NodeSocketFloat", 0.009, 0, 0.1)
+    socket("Roughness Variation", "NodeSocketFloat", 0.3, 0, 1)
     group.interface.new_socket(name="Shader", in_out="OUTPUT", socket_type="NodeSocketShader")
 
     def node(kind, label, x, y):
@@ -106,30 +106,6 @@ def make_material():
     link(controls, "Pattern Scale", scale, "Scale")
     chips = noise("Fractal Paint Chips", 3.8, 5, -950, 450, scale)
     grain = noise("Steel Pitting / Paint Grain", 145, 2, -950, -100, scale)
-    stretch = node("ShaderNodeVectorMath", "Directional Scratch Stretch", -950, -500)
-    stretch.operation = "MULTIPLY"
-    stretch.inputs[1].default_value = (1.2, 32, 32)
-    scratch_scale = node("ShaderNodeVectorMath", "Scratch Frequency", -1450, -1700)
-    scratch_scale.operation = "SCALE"
-    link(scale, "Vector", scratch_scale, 0)
-    link(controls, "Scratch Scale", scratch_scale, "Scale")
-    link(scratch_scale, "Vector", stretch, 0)
-    scratches = noise("Fine Abrasion", 1, 2, -700, -500, stretch)
-    scratch_mask = ramp("Sparse Hairline Scratches", scratches,
-                        [(0.63, (0, 0, 0, 1)), (0.68, (1, 1, 1, 1))], -450, -500)
-    rotation = node("ShaderNodeMapping", "Crossing Scratch Direction", -1200, -1700)
-    rotation.inputs["Rotation"].default_value = (0.45, 0.65, 0.55)
-    link(scratch_scale, "Vector", rotation, "Vector")
-    cross_stretch = node("ShaderNodeVectorMath", "Cross Scratch Stretch", -950, -1700)
-    cross_stretch.operation = "MULTIPLY"
-    cross_stretch.inputs[1].default_value = (1.8, 45, 45)
-    link(rotation, "Vector", cross_stretch, 0)
-    cross_noise = noise("Cross Abrasion", 1, 2, -700, -1700, cross_stretch)
-    cross_mask = ramp("Sparse Crossing Scratches", cross_noise,
-                      [(0.65, (0, 0, 0, 1)), (0.70, (1, 1, 1, 1))], -450, -1700)
-    combined_scratches = math_node("Two Scratch Directions", "MAXIMUM", -200, -1700)
-    link(scratch_mask, "Color", combined_scratches, 0)
-    link(cross_mask, "Color", combined_scratches, 1)
     threshold = math_node("Wear Threshold", "SUBTRACT", -950, 800, 1.05)
     link(controls, "Wear", threshold, 1)
     difference = math_node("Noise minus Threshold", "SUBTRACT", -700, 450)
@@ -143,9 +119,6 @@ def make_material():
     undercoat = math_node("Oxidized Chip Border", "ADD", -200, 180, b=1.25)
     undercoat.use_clamp = True
     link(amplify, 0, undercoat, 0)
-    abrasion = math_node("Independent Scratch Amount", "MULTIPLY", -200, -450)
-    link(combined_scratches, 0, abrasion, 0)
-    link(controls, "Scratch Amount", abrasion, 1)
     # Inside AO probes convex edges; ordinary AO probes sheltered creases.
     # Avoid Pointiness/Bevel shader nodes, which are unsupported in Eevee.
     geometry = node("ShaderNodeNewGeometry", "Unbumped Geometry Normal", -1450, -950)
@@ -174,12 +147,12 @@ def make_material():
     edge_amount = math_node("Edge Wear Amount", "MULTIPLY", -200, -900)
     link(broken_edge, 0, edge_amount, 0)
     link(controls, "Edge Wear", edge_amount, 1)
-    chips_scratches = math_node("Chips plus Scratches", "MAXIMUM", 50, 650)
-    link(exposed, 0, chips_scratches, 0)
-    link(abrasion, 0, chips_scratches, 1)
-    bare = math_node("Include Convex Edge Wear", "MAXIMUM", 300, 650)
-    link(chips_scratches, 0, bare, 0)
+    bare = math_node("Edge Only Exposed Steel", "MULTIPLY", 300, 650)
+    link(exposed, 0, bare, 0)
     link(edge_amount, 0, bare, 1)
+    edge_undercoat = math_node("Edge Only Rust Border", "MULTIPLY", 50, 400)
+    link(undercoat, 0, edge_undercoat, 0)
+    link(edge_amount, 0, edge_undercoat, 1)
     cavity_gain = math_node("Crease Dust Concentration", "MULTIPLY", -700, -1250, b=2.5)
     cavity_gain.use_clamp = True
     link(concave, 0, cavity_gain, 0)
@@ -189,7 +162,7 @@ def make_material():
     dust = math_node("Dust Coverage", "MULTIPLY", -200, -1250)
     link(dusty_noise, 0, dust, 0)
     link(controls, "Dust Amount", dust, 1)
-    edge = mix("Paint / Rust Border", undercoat, (controls, "Paint Color"),
+    edge = mix("Paint / Rust Border", edge_undercoat, (controls, "Paint Color"),
                (controls, "Rust Color"), 50, 150)
     color = mix("Reveal Steel", bare, (edge, 0), (controls, "Metal Color"), 300, 300)
     variation = ramp("Subtle Surface Mottling", grain,
@@ -199,24 +172,28 @@ def make_material():
     tint.inputs[0].default_value = 0.45
     link(color, 0, tint, 1)
     link(variation, 0, tint, 2)
-    rough = mix("Paint / Steel Roughness", bare, (controls, "Paint Roughness"),
+    rough_noise = noise("Uneven Paint Roughness", 7, 3, -950, -500, scale)
+    centered = math_node("Centered Roughness Noise", "SUBTRACT", -700, -500, b=0.5)
+    link(rough_noise, "Fac", centered, 0)
+    rough_amount = math_node("Paint Roughness Variation", "MULTIPLY", -450, -500)
+    link(centered, 0, rough_amount, 0)
+    link(controls, "Roughness Variation", rough_amount, 1)
+    paint_rough = math_node("Varied Paint Roughness", "ADD", 50, -650)
+    paint_rough.use_clamp = True
+    link(controls, "Paint Roughness", paint_rough, 0)
+    link(rough_amount, 0, paint_rough, 1)
+    rough = mix("Paint / Steel Roughness", bare, (paint_rough, 0),
                 (0.58, 0.58, 0.58, 1), 550, 0)
     micro = node("ShaderNodeBump", "Fine Surface Grain", 300, -400)
     micro.inputs["Strength"].default_value = 0.22
     micro.inputs["Distance"].default_value = 0.008
     link(grain, "Fac", micro, "Height")
-    relief = node("ShaderNodeBump", "Recessed Chips and Scratches", 550, -350)
+    relief = node("ShaderNodeBump", "Recessed Edge Chips", 550, -350)
     relief.invert = True
     relief.inputs["Strength"].default_value = 0.32
     link(controls, "Relief", relief, "Distance")
     link(bare, 0, relief, "Height")
     link(micro, "Normal", relief, "Normal")
-    scratch_bump = node("ShaderNodeBump", "Incised Surface Scratches", 550, -700)
-    scratch_bump.invert = True
-    scratch_bump.inputs["Strength"].default_value = 0.3
-    link(controls, "Scratch Depth", scratch_bump, "Distance")
-    link(abrasion, 0, scratch_bump, "Height")
-    link(relief, "Normal", scratch_bump, "Normal")
     dust_color = mix("Dust over Painted Metal", dust, (tint, 0),
                      (controls, "Dust Color"), 850, 650)
     dust_rough = mix("Matte Dust Roughness", dust, (rough, 0),
@@ -227,7 +204,7 @@ def make_material():
     link(dust_color, 0, shader, "Base Color")
     link(dust_metal, 0, shader, "Metallic")
     link(dust_rough, 0, shader, "Roughness")
-    link(scratch_bump, "Normal", shader, "Normal")
+    link(relief, "Normal", shader, "Normal")
     output = node("NodeGroupOutput", "Surface Output", 1450, 350)
     link(shader, "BSDF", output, "Shader")
     instance = tree.nodes.new("ShaderNodeGroup")
@@ -258,31 +235,8 @@ def preview(scene, target, directory, render):
     bpy.ops.object.select_all(action="DESELECT")
     target.select_set(True)
     bpy.context.view_layer.objects.active = target
-    scene.render.engine = "CYCLES"
-    scene.cycles.samples = 48
-    scene.cycles.use_denoising = True
-    scene.render.resolution_x = scene.render.resolution_y = 800
-    scene.render.resolution_percentage = 100
-    scene.world.use_nodes = True
-    scene.world.node_tree.nodes.get("Background").inputs[0].default_value = (0.15, 0.18, 0.23, 1)
-    scene.world.node_tree.nodes.get("Background").inputs[1].default_value = 0.45
-    for name, location, power, size in [
-        ("Preview Key", (3, -4, 5), 950, 4),
-        ("Preview Fill", (-4, -2, 2), 700, 3),
-        ("Preview Rim", (2, 3, 4), 1100, 3),
-    ]:
-        obj = bpy.data.objects.get(name)
-        if obj is None:
-            obj = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
-            scene.collection.objects.link(obj)
-        obj.location = location
-        obj.rotation_euler = (target.location - obj.location).to_track_quat("-Z", "Y").to_euler()
-        obj.data.energy, obj.data.shape, obj.data.size = power, "DISK", size
-    if scene.camera:
-        scene.camera.location = target.location + Vector((4, -6, 3.5))
-        scene.camera.rotation_euler = (target.location - scene.camera.location).to_track_quat("-Z", "Y").to_euler()
-        scene.camera.data.type = "ORTHO"
-        scene.camera.data.ortho_scale = 3.9
+    from preview_utils import setup_studio
+    setup_studio(scene, target)
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(directory / "worn_painted_metal_preview.png")
     bpy.ops.wm.save_as_mainfile(filepath=str(directory / "worn_painted_metal.blend"))
