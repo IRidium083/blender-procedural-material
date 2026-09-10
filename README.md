@@ -1,14 +1,18 @@
 # Procedural materials
 
-Blender 5.2 shader materials with editable node groups, no image textures required.
+Blender 5.2 materials with editable shader node groups. See each material guide
+for controls and any bundled texture assets.
+
 
 | Material | Files | Preview |
 | --- | --- | --- |
 | Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | [Cycles](worn_painted_metal/recessed_metal_cycles.png) |
 | Machined aluminum | [Guide and controls](machined_aluminum/README.md) | [Cycles](machined_aluminum/machined_aluminum_preview.png) |
+| Textured plastic / hard rubber grip | [Guide and presets](textured_grip/README.md) | [Preview](textured_grip/textured_grip_preview.png) |
+| Phosphated gun steel | [Guide and controls](phosphated_gun_steel/README.md) | [Preview](phosphated_gun_steel/phosphated_gun_steel_preview.png) |
 
-Each material folder contains its generator, saved `.blend`, render previews,
-and test script. Open its `.blend` to inspect or append the material, or open
+Each material folder contains its generator, saved `.blend`, and render previews.
+Painted metal and aluminum also include test scripts. Open its `.blend` to inspect or append the material, or open
 the generator in Blender's Text Editor and run it with a mesh selected.
 Keep this folder structure when running generators.
 
