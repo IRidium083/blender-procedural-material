@@ -43,13 +43,14 @@ def make_material(plastic=False):
     mat.node_tree.nodes.clear()
     group = bpy.data.node_groups.new(name, "ShaderNodeTree")
     for title, kind, value, limits in [
+        ("Meters Per Unit", "NodeSocketFloat", bpy.context.scene.unit_settings.scale_length, (0.000001, 1000)),
         ("Base Color", "NodeSocketColor", (0.022, 0.027, 0.03, 1), None),
-        ("Texture Scale", "NodeSocketFloat", 42.0, (1, 500)),
-        ("Texture Depth", "NodeSocketFloat", 0.014 if plastic else 0.022, (0, 0.2)),
-        ("Micro Grain", "NodeSocketFloat", 0.0015, (0, 0.03)),
+        ("Texture Scale", "NodeSocketFloat", 567.0, (1, 10000)),
+        ("Texture Depth", "NodeSocketFloat", 0.0003 if plastic else 0.0005, (0, 0.005)),
+        ("Micro Grain", "NodeSocketFloat", 0.00003, (0, 0.001)),
         ("Roughness", "NodeSocketFloat", 0.46 if plastic else 0.68, (0, 1)),
         ("Handling Wear", "NodeSocketFloat", 0.16, (0, 1)),
-        ("Edge Width", "NodeSocketFloat", 0.045, (0.001, 2)),
+        ("Edge Width", "NodeSocketFloat", 0.001, (0.00001, 0.05)),
         ("Texture Roughness", "NodeSocketFloat", 0.12, (0, 0.5)),
     ]:
         s = group.interface.new_socket(name=title, in_out="INPUT", socket_type=kind)
@@ -77,7 +78,19 @@ def make_material(plastic=False):
     coords = node("ShaderNodeTexCoord", "Object Space - No UVs", -1300, 200)
     scale = node("ShaderNodeVectorMath", "Stipple Frequency", -1050, 200)
     scale.operation = "SCALE"
-    link(coords, "Object", scale, 0)
+    metric = node("ShaderNodeVectorMath", "Coordinates in Meters", -1550, 200)
+    metric.operation = "SCALE"
+    link(coords, "Object", metric, 0)
+    link(inp, "Meters Per Unit", metric, "Scale")
+    link(metric, "Vector", scale, 0)
+
+    def distance(control, target):
+        convert = node("ShaderNodeMath", control + " to Scene Units", -1550, -100 - 180 * len([n for n in group.nodes if n.name.endswith("to Scene Units")]))
+        convert.operation = "DIVIDE"
+        link(inp, control, convert, 0)
+        link(inp, "Meters Per Unit", convert, 1)
+        link(convert, 0, target, "Distance")
+
     link(inp, "Texture Scale", scale, "Scale")
     # Preserve approximately the original scale control's grain density.
     image_scale = node("ShaderNodeVectorMath", "Stipple Image Repeat Scale", -1050, 950)
@@ -102,7 +115,7 @@ def make_material(plastic=False):
     link(grain, "Fac", variation, 2)
     ao = node("ShaderNodeAmbientOcclusion", "Raised Edge Handling", -1050, -450)
     ao.inside, ao.samples = True, 16
-    link(inp, "Edge Width", ao, "Distance")
+    distance("Edge Width", ao)
     inverse = math("Convex Edge Mask", "SUBTRACT", -800, -450)
     inverse.inputs[0].default_value = 1
     link(ao, "AO", inverse, 1)
@@ -135,11 +148,14 @@ def make_material(plastic=False):
     micro = node("ShaderNodeBump", "Microscopic Mold Texture", -300, -800)
     micro.inputs["Strength"].default_value = 0.22
     link(grain, "Fac", micro, "Height")
-    link(inp, "Micro Grain", micro, "Distance")
+    distance("Micro Grain", micro)
     bump = node("ShaderNodeBump", "Raised Grip Stipple", 450, -450)
     bump.inputs["Strength"].default_value = 0.65
     link(profile, "Color", bump, "Height")
-    link(depth, 0, bump, "Distance")
+    depth_units = math("Stipple Depth to Scene Units", "DIVIDE", 450, -700)
+    link(depth, 0, depth_units, 0)
+    link(inp, "Meters Per Unit", depth_units, 1)
+    link(depth_units, 0, bump, "Distance")
     link(micro, "Normal", bump, "Normal")
     shader = node("ShaderNodeBsdfPrincipled", "Nonmetallic Molded Grip", 750, 450)
     shader.inputs["Metallic"].default_value = 0
@@ -210,6 +226,9 @@ def make_preview(directory, render):
     bpy.context.view_layer.objects.active = body
     bpy.data.texts.load(str(directory / "textured_grip.py"))
     bpy.data.images[DETAIL_IMAGE].filepath = "//textures/molded_grip_height.png"
+    sys.path.insert(0, str(directory.parent))
+    from real_scale_utils import resize_studio
+    resize_studio(scene, body, 0.2 if "Grip" in body.name else 0.28)
     bpy.ops.wm.save_as_mainfile(filepath=str(directory / "textured_grip.blend"))
     if render:
         bpy.ops.render.render(write_still=True)

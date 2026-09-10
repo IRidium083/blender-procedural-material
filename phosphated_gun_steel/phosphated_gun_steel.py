@@ -43,14 +43,16 @@ def make_material():
     mat.node_tree.nodes.clear()
     group = bpy.data.node_groups.new(NAME, "ShaderNodeTree")
     controls = [
+        ("Meters Per Unit", "NodeSocketFloat", bpy.context.scene.unit_settings.scale_length, (0.000001, 1000)),
         ("Finish Color", "NodeSocketColor", (0.035, 0.041, 0.038, 1), None),
         ("Exposed Steel", "NodeSocketColor", (0.24, 0.27, 0.28, 1), None),
         ("Roughness", "NodeSocketFloat", 0.57, (0, 1)),
         ("Edge Wear", "NodeSocketFloat", 0.38, (0, 1)),
-        ("Edge Width", "NodeSocketFloat", 0.045, (0.001, 2)),
+        ("Edge Width", "NodeSocketFloat", 0.0005, (0.00001, 0.05)),
         ("Scratches", "NodeSocketFloat", 0.22, (0, 1)),
-        ("Grain Depth", "NodeSocketFloat", 0.0015, (0, 0.03)),
-        ("Pattern Scale", "NodeSocketFloat", 1.0, (0.01, 100)),
+        ("Scratch Depth", "NodeSocketFloat", 0.00003, (0, 0.001)),
+        ("Grain Depth", "NodeSocketFloat", 0.00001, (0, 0.001)),
+        ("Pattern Scale", "NodeSocketFloat", 10.0, (0.01, 1000)),
         ("Microdetail Tiling", "NodeSocketFloat", 2.0, (0.01, 50)),
         ("Micro Roughness", "NodeSocketFloat", 0.12, (0, 0.5)),
     ]
@@ -102,7 +104,19 @@ def make_material():
     tex = node("ShaderNodeTexCoord", "Object Coordinates", -1250, 250)
     scale = node("ShaderNodeVectorMath", "Pattern Scale", -1000, 250)
     scale.operation = "SCALE"
-    link(tex, "Object", scale, 0)
+    metric = node("ShaderNodeVectorMath", "Coordinates in Meters", -1550, 200)
+    metric.operation = "SCALE"
+    link(tex, "Object", metric, 0)
+    link(inp, "Meters Per Unit", metric, "Scale")
+    link(metric, "Vector", scale, 0)
+
+    def distance(control, target):
+        convert = node("ShaderNodeMath", control + " to Scene Units", -1550, -100 - 180 * len([n for n in group.nodes if n.name.endswith("to Scene Units")]))
+        convert.operation = "DIVIDE"
+        link(inp, control, convert, 0)
+        link(inp, "Meters Per Unit", convert, 1)
+        link(convert, 0, target, "Distance")
+
     link(inp, "Pattern Scale", scale, "Scale")
     mottle = noise("Subtle Phosphate Variation", scale, 5, -750, 450, 3)
     detail_scale = node("ShaderNodeVectorMath", "Microdetail Tiling", -1250, -1150)
@@ -131,7 +145,7 @@ def make_material():
     ao = node("ShaderNodeAmbientOcclusion", "Convex Edge Detection", -1000, -600)
     ao.inside = True
     ao.samples = 16
-    link(inp, "Edge Width", ao, "Distance")
+    distance("Edge Width", ao)
     inverse = math("Convex Wear Mask", "SUBTRACT", -750, -600, 1)
     link(ao, "AO", inverse, 1)
     gain = math("Narrow Edge Polish", "MULTIPLY", -500, -600, b=4)
@@ -165,11 +179,11 @@ def make_material():
     bump = node("ShaderNodeBump", "Microscopic Phosphate Texture", 0, -900)
     bump.inputs["Strength"].default_value = 0.18
     link(grain, "Color", bump, "Height")
-    link(inp, "Grain Depth", bump, "Distance")
+    distance("Grain Depth", bump)
     cut = node("ShaderNodeBump", "Shallow Hairline Scratches", 250, -900)
     cut.invert = True
     cut.inputs["Strength"].default_value = 0.2
-    cut.inputs["Distance"].default_value = 0.003
+    distance("Scratch Depth", cut)
     link(scratch, 0, cut, "Height")
     link(bump, "Normal", cut, "Normal")
     shader = node("ShaderNodeBsdfPrincipled", "Dark Matte Gun Steel", 800, 450)
@@ -257,6 +271,9 @@ def make_preview(mat, directory, render):
     # Embed the script for convenient editing from the delivered .blend.
     bpy.data.texts.load(str(directory / "phosphated_gun_steel.py"))
     mat.node_tree.nodes.get("Group").node_tree.nodes["Phosphate Microdetail - Only Image Texture"].image.filepath = "//textures/phosphate_microdetail.png"
+    sys.path.insert(0, str(directory.parent))
+    from real_scale_utils import resize_studio
+    resize_studio(scene, body, 0.2 if "Grip" in body.name else 0.28)
     bpy.ops.wm.save_as_mainfile(filepath=str(directory / "phosphated_gun_steel.blend"))
     if render:
         bpy.ops.render.render(write_still=True)

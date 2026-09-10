@@ -35,45 +35,13 @@ $blender = 'C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe'
 The generator changes the file on disk, so reopen it in Blender to see updates
 if that scene was already open in the UI.
 
-## Publishing reusable material assets
+## Checklist for future materials
 
-1. Create a material folder containing its generator, README, saved scene, and
-   preview. Keep image maps in `textures/` and record their provenance in
-   `textures/SOURCE.md`. Use Non-Color for numeric detail maps.
-2. Build the node group with meaningful input names, sensible defaults, and
-   bounded ranges. Reuse shared studio utilities where appropriate. For metal,
-   keep machining detail subtle; choose color, roughness, and anisotropy before
-   introducing visible bump. Match the technique to the intended finish.
-3. Apply the material to a representative sample, render in Cycles, inspect it,
-   and test Eevee where supported. Save the scene and keep its embedded generator
-   synchronized with the source file. Keep texture dependencies packed.
-4. Add a new scene to `SCENES` in `prepare_assets.py`, selecting its catalog and
-   a representative PNG thumbnail. The existing two grip presets share their
-   scene preview; use separate thumbnails if distinct preset previews are needed.
-5. Run the asset preparation command below after generating or updating scenes.
-   It marks material groups as assets, adds descriptions and tags, assigns stable
-   catalog UUIDs, loads thumbnails, enables fake users, packs textures, and saves.
-   It reopens every scene to verify metadata, thumbnails, and packed dependencies.
-6. Inspect the assets in Blender's Asset Browser. Refresh the library after
-   updates. Commit scripts, documentation, catalog definitions, textures, scenes,
-   and previews together. Avoid committing Blender backup files.
-
-```powershell
-& $blender --factory-startup -b --python-exit-code 1 -P prepare_assets.py
-```
-
-The preparation script works on saved scenes and does not change Blender user
-preferences. It does not standardize existing controls or create extra finish
-presets; those remain deliberate material authoring choices.
-
-## Asset preparation log ? 2026-09-09
-
-- Published five material assets across four existing scene files.
-- Metals: Machined Metal; Phosphated Gun Steel - Slightly Used.
-- Painted Surfaces: Worn Painted Metal.
-- Plastics and Rubber: Textured Grip - Hard Polymer; Textured Grip - Hard Rubber.
-- Used the existing scene renders for asset thumbnails and packed image maps.
-- Reopened all four scenes: asset metadata, thumbnails, and packing checks passed.
-
-API references: [asset operations](https://docs.blender.org/api/5.2/bpy.ops.asset.html)
-and [catalog format](https://developer.blender.org/docs/features/asset_system/backend/asset_catalogs/).
+1. Create a material folder with its generator, README, saved scene, and preview.
+   Store image maps in `textures/` and record their source in `textures/SOURCE.md`.
+2. Expose meaningful group inputs with sensible defaults and bounded ranges.
+   Choose color, roughness, anisotropy, or bump according to the intended finish.
+3. Render a representative sample, inspect it, and test supported render engines.
+4. Pack image dependencies and keep embedded scripts synchronized with source.
+5. Save the scene, update documentation, and commit source and outputs together.
+   Reuse materials through File > Append > the scene file > Material.

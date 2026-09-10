@@ -30,11 +30,10 @@ without the external PNG. This is AI-generated artistic height detail, not a
 measured or calibrated scan; see `textures/SOURCE.md` for the generation prompt.
 
 Object-space patterns suit consistently
-scaled meshes; defaults fit the roughly 2.7-unit-tall sample. Relief is shader
+scaled meshes; defaults fit the 20 cm tall grip sample. Relief is shader
 bump, so it does not change the silhouette. Large ribs on the preview are geometry.
 Cycles is the reference renderer; Eevee supports the node types but its
-screen-space AO may give different handling-wear masks. Edge Width is measured
-in scene units. Use solid meshes with outward normals for convex AO.
+screen-space AO may give different handling-wear masks. Edge Width is entered in meters. Use solid meshes with outward normals for convex AO.
 
 Regenerate the separate preview scene from this folder:
 
@@ -44,3 +43,23 @@ Regenerate the separate preview scene from this folder:
 
 The preview saves `textured_grip.blend` and `textured_grip_preview.png` here and
 embeds the script in the blend file. The original test scene is unchanged.
+
+## Real dimensions
+
+The shader now uses physical-size defaults. Apply object scale with **Ctrl+A >
+Scale** before assigning the material, including after setting object dimensions.
+Object coordinates use mesh-local dimensions; unapplied scale can stretch detail.
+The material does not automatically normalize its texture to the object's bounds:
+large parts show more repeats, while small parts retain the same feature size.
+
+**Meters Per Unit** converts local coordinates into meters and converts bump/AO
+lengths back into scene units. It defaults to Scene > Units > Unit Scale when the
+material is generated. Leave it at **1** for ordinary meter-based Blender scenes,
+even if the length display is centimeters. Use **0.01** only when Unit Scale is
+0.01. After appending to a scene with different Unit Scale, update this input.
+All depth and edge-width controls are entered in meters.
+
+The saved rubber grip is 0.20 m tall. Texture Scale defaults to 567;
+Texture Depth is 0.5 mm for rubber and 0.3 mm for polymer. Micro Grain is
+0.03 mm; the handling band is 1 mm. These are artistic shader settings,
+not measured manufacturing specifications.

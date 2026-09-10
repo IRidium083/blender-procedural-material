@@ -36,21 +36,3 @@ $blender = 'C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe'
 Preview generation adjusts the sample's bevel, lights, and camera. Painted-metal
 testing updates its saved scene and renders Cycles, Eevee, and a clean comparison.
 Machined metal testing renders Eevee without changing the saved Cycles scene.
-
-## Use as an Asset Library
-
-The four material scene files contain five marked material assets with thumbnails,
-organized into Metals, Painted Surfaces, and Plastics and Rubber catalogs.
-
-In Blender Preferences, add this project folder (`E:\Dev\blender-procedural-material`)
-as an Asset Library. Select it in the Asset Browser and drag a material onto an
-object. Use **Append (Reuse Data)** for locally editable materials; choose **Link**
-when you want the material to remain dependent on the source library. Appended
-materials do not automatically receive later source changes.
-
-The library files are prepared; registering the folder in your Blender preferences
-is a one-time local setup. Image textures are packed into the material scenes.
-
-After regenerating scenes, run `prepare_assets.py` with Blender to refresh asset
-metadata and verify saved assets. See [WORKFLOW.md](WORKFLOW.md) for the complete
-creation/publishing checklist and preparation log.

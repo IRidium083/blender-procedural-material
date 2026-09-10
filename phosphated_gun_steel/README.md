@@ -19,7 +19,7 @@ plus studio lighting and an embedded copy of the script.
 | Finish Color / Exposed Steel | Coated surface and polished steel colors |
 | Roughness | Matte finish; defaults to 0.57 |
 | Edge Wear | Restrained edge polish; zero disables it |
-| Edge Width | AO distance in scene units; defaults to 0.045 |
+| Edge Width | AO distance in scene units; defaults to 0.0005 m |
 | Scratches | Independent shallow abrasion; zero disables it |
 | Grain Depth | Microscopic coating relief |
 | Pattern Scale | Object-space texture frequency |
@@ -44,3 +44,22 @@ From this folder, regenerate the preview (the source test scene is unchanged):
 ```powershell
 & 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' -b ../test.blend --python-exit-code 1 -P phosphated_gun_steel.py -- --preview --render
 ```
+
+## Real dimensions
+
+The shader now uses physical-size defaults. Apply object scale with **Ctrl+A >
+Scale** before assigning the material, including after setting object dimensions.
+Object coordinates use mesh-local dimensions; unapplied scale can stretch detail.
+The material does not automatically normalize its texture to the object's bounds:
+large parts show more repeats, while small parts retain the same feature size.
+
+**Meters Per Unit** converts local coordinates into meters and converts bump/AO
+lengths back into scene units. It defaults to Scene > Units > Unit Scale when the
+material is generated. Leave it at **1** for ordinary meter-based Blender scenes,
+even if the length display is centimeters. Use **0.01** only when Unit Scale is
+0.01. After appending to a scene with different Unit Scale, update this input.
+All depth and edge-width controls are entered in meters.
+
+The saved steel sample is 0.28 m long. Pattern Scale defaults to 10;
+Edge Width is 0.5 mm, Grain Depth is 0.01 mm, and Scratch Depth is 0.03 mm.
+These are artistic shader settings, not measured coating specifications.
