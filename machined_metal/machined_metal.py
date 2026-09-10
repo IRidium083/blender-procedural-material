@@ -1,4 +1,4 @@
-"""Procedural machined aluminum for Blender 5.2; apply to selected meshes.
+"""Image-assisted machined metal for Blender 5.2; apply to selected meshes.
 
 Object-space parallel tool marks, anisotropic reflections and uneven roughness.
 Run with --preview --render to save a studio sample beside this script.
@@ -13,11 +13,12 @@ DIRECTORY = Path(__file__).resolve().parent
 sys.path.insert(0, str(DIRECTORY.parent))
 from preview_utils import setup_studio
 
-NAME = "Machined Aluminum"
+NAME = "Machined Metal"
 
 
 def make_material():
-    material = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
+    material = bpy.data.materials.get(NAME) or bpy.data.materials.get("Machined Aluminum") or bpy.data.materials.new(NAME)
+    material.name = NAME
     material.use_nodes = True
     material.diffuse_color = (0.72, 0.76, 0.8, 1)
     tree = material.node_tree
@@ -30,12 +31,13 @@ def make_material():
         if low is not None:
             socket.min_value, socket.max_value = low, high
 
-    control("Aluminum Color", "NodeSocketColor", (0.72, 0.76, 0.8, 1))
+    control("Metal Color", "NodeSocketColor", (0.72, 0.76, 0.8, 1))
     control("Roughness", "NodeSocketFloat", 0.28, 0, 1)
-    control("Roughness Variation", "NodeSocketFloat", 0.04, 0, 1)
+    control("Roughness Variation", "NodeSocketFloat", 0.18, 0, 1)
     control("Anisotropy", "NodeSocketFloat", 0.65, 0, 1)
-    control("Tool Mark Scale", "NodeSocketFloat", 22, 1, 1000)
-    control("Tool Mark Depth", "NodeSocketFloat", 0.001, 0, 0.02)
+    control("Tool Mark Scale", "NodeSocketFloat", 1.5, 0.01, 100)
+    control("Mark Color Variation", "NodeSocketFloat", 0.12, 0, 1)
+    control("Anisotropy Variation", "NodeSocketFloat", 0.3, 0, 1)
     control("Machining Rotation", "NodeSocketFloat", 0, -3.141593, 3.141593)
     group.interface.new_socket(name="Shader", in_out="OUTPUT", socket_type="NodeSocketShader")
 
@@ -56,35 +58,47 @@ def make_material():
     mapping = node("ShaderNodeMapping", "Tool Orientation", -850, 100)
     link(coords, "Object", mapping, "Vector")
     link(rotation, "Vector", mapping, "Rotation")
-    wave = node("ShaderNodeTexWave", "Parallel Milling Passes", -600, 150)
-    wave.wave_type = "BANDS"
-    wave.bands_direction = "X"
-    wave.wave_profile = "SIN"
-    wave.inputs["Distortion"].default_value = 0.15
-    wave.inputs["Detail Scale"].default_value = 0.6
-    link(mapping, "Vector", wave, "Vector")
-    link(controls, "Tool Mark Scale", wave, "Scale")
-    noise = node("ShaderNodeTexNoise", "Subtle Finish Variation", -600, -200)
-    noise.inputs["Scale"].default_value = 5
-    noise.inputs["Detail"].default_value = 2
-    link(mapping, "Vector", noise, "Vector")
+    frequency = node("ShaderNodeVectorMath", "Texture Tiling", -650, 150)
+    frequency.operation = "SCALE"
+    link(mapping, "Vector", frequency, 0)
+    link(controls, "Tool Mark Scale", frequency, "Scale")
+    texture_path = DIRECTORY / "textures" / "machining_height.png"
+    image = bpy.data.images.load(str(texture_path), check_existing=True)
+    image.colorspace_settings.name = "Non-Color"
+    image.pack()
+    detail = node("ShaderNodeTexImage", "Machining Microdetail", -400, 150)
+    detail.image = image
+    detail.projection = "BOX"
+    detail.projection_blend = 0.2
+    detail.extension = "REPEAT"
+    link(frequency, "Vector", detail, "Vector")
     centered = node("ShaderNodeMath", "Center Finish Noise", -350, -200)
     centered.operation = "SUBTRACT"
     centered.inputs[1].default_value = 0.5
-    link(noise, "Fac", centered, 0)
+    link(detail, "Color", centered, 0)
     amount = node("ShaderNodeMath", "Finish Variation Amount", -100, -200)
     amount.operation = "MULTIPLY"
     link(centered, 0, amount, 0)
     link(controls, "Roughness Variation", amount, 1)
-    roughness = node("ShaderNodeMath", "Aluminum Roughness", 150, -100)
+    roughness = node("ShaderNodeMath", "Metal Roughness", 150, -100)
     roughness.operation = "ADD"
     roughness.use_clamp = True
     link(amount, 0, roughness, 0)
     link(controls, "Roughness", roughness, 1)
-    bump = node("ShaderNodeBump", "Shallow Tool Grooves", -100, 150)
-    bump.inputs["Strength"].default_value = 0.35
-    link(wave, "Fac", bump, "Height")
-    link(controls, "Tool Mark Depth", bump, "Distance")
+    color = node("ShaderNodeMixRGB", "Subtle Machining Color", 150, 650)
+    color.blend_type = "MULTIPLY"
+    link(controls, "Mark Color Variation", color, 0)
+    link(controls, "Metal Color", color, 1)
+    link(detail, "Color", color, 2)
+    anis_amount = node("ShaderNodeMath", "Machining Anisotropy Variation", -100, 400)
+    anis_amount.operation = "MULTIPLY"
+    link(centered, 0, anis_amount, 0)
+    link(controls, "Anisotropy Variation", anis_amount, 1)
+    anis = node("ShaderNodeMath", "Varied Anisotropy", 150, 400)
+    anis.operation = "ADD"
+    anis.use_clamp = True
+    link(controls, "Anisotropy", anis, 0)
+    link(anis_amount, 0, anis, 1)
     # Rotate the local groove direction with the inverse coordinate rotation.
     angle = node("ShaderNodeMath", "Inverse Tool Angle", -850, -500)
     angle.operation = "MULTIPLY"
@@ -99,13 +113,36 @@ def make_material():
     world.convert_from = "OBJECT"
     world.convert_to = "WORLD"
     link(tangent, "Vector", world, "Vector")
-    shader = node("ShaderNodeBsdfPrincipled", "Solid Machined Aluminum", 450, 400)
+    geometry = node("ShaderNodeNewGeometry", "Surface Geometry", -850, -800)
+    across = node("ShaderNodeVectorMath", "Across Tool Direction", -600, -800)
+    across.operation = "CROSS_PRODUCT"
+    link(geometry, "Normal", across, 0)
+    link(world, "Vector", across, 1)
+    projected = node("ShaderNodeVectorMath", "Surface Tool Direction", -350, -800)
+    projected.operation = "CROSS_PRODUCT"
+    link(across, "Vector", projected, 0)
+    link(geometry, "Normal", projected, 1)
+    length = node("ShaderNodeVectorMath", "Tangent Length", -100, -800)
+    length.operation = "LENGTH"
+    link(projected, "Vector", length, 0)
+    parallel = node("ShaderNodeMath", "Parallel Direction Fallback", 150, -800)
+    parallel.operation = "LESS_THAN"
+    parallel.inputs[1].default_value = 0.01
+    link(length, "Value", parallel, 0)
+    fallback = node("ShaderNodeVectorMath", "Fallback Surface Direction", -350, -1050)
+    fallback.operation = "CROSS_PRODUCT"
+    fallback.inputs[1].default_value = (0, 0, 1)
+    link(geometry, "Normal", fallback, 0)
+    select = node("ShaderNodeMixRGB", "Stable Surface Tangent", 400, -800)
+    link(parallel, 0, select, 0)
+    link(projected, "Vector", select, 1)
+    link(fallback, "Vector", select, 2)
+    shader = node("ShaderNodeBsdfPrincipled", "Solid Machined Metal", 450, 400)
     shader.inputs["Metallic"].default_value = 1
-    link(controls, "Aluminum Color", shader, "Base Color")
+    link(color, "Color", shader, "Base Color")
     link(roughness, 0, shader, "Roughness")
-    link(controls, "Anisotropy", shader, "Anisotropic")
-    link(world, "Vector", shader, "Tangent")
-    link(bump, "Normal", shader, "Normal")
+    link(anis, 0, shader, "Anisotropic")
+    link(select, "Color", shader, "Tangent")
     output = node("NodeGroupOutput", "Surface Output", 800, 400)
     link(shader, "BSDF", output, "Shader")
     instance = tree.nodes.new("ShaderNodeGroup")
@@ -142,12 +179,18 @@ def main():
         scene.world.node_tree.nodes["Background"].inputs[0].default_value = (0.45, 0.45, 0.45, 1)
         scene.world.node_tree.nodes["Background"].inputs[1].default_value = 0.8
         scene.render.image_settings.file_format = "PNG"
-        scene.render.filepath = str(DIRECTORY / "machined_aluminum_preview.png")
+        scene.render.filepath = str(DIRECTORY / "machined_metal_preview.png")
+        for old_text in list(bpy.data.texts):
+            if old_text.name == "machined_aluminum.py":
+                bpy.data.texts.remove(old_text)
         text = bpy.data.texts.get(Path(__file__).name) or bpy.data.texts.new(Path(__file__).name)
         text.clear()
         text.write(Path(__file__).read_text(encoding="utf-8"))
         text.filepath = str(Path(__file__).resolve())
-        bpy.ops.wm.save_as_mainfile(filepath=str(DIRECTORY / "machined_aluminum.blend"))
+        image = bpy.data.images.get("machining_height.png")
+        if image:
+            image.filepath = "//textures/machining_height.png"
+        bpy.ops.wm.save_as_mainfile(filepath=str(DIRECTORY / "machined_metal.blend"))
         if args.render:
             bpy.ops.render.render(write_still=True)
     print(f"Applied {NAME} to {len(targets)} mesh(es)")

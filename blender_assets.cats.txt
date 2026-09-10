@@ -1,0 +1,5 @@
+# Material library catalogs
+VERSION 1
+6536ab19-377f-5ac5-8a63-28f82a06b504:Metals:Metals
+ab7694f7-e7e3-50fa-92cf-cb897b61831a:Painted Surfaces:Painted Surfaces
+56b0f4ff-b3d2-536e-8e35-396c6263b812:Plastics and Rubber:Plastics and Rubber
