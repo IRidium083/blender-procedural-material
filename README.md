@@ -12,6 +12,7 @@ for controls and any bundled texture assets.
 | Machined metal | [Guide and controls](machined_metal/README.md) | [Cycles](machined_metal/machined_metal_preview.png) |
 | Textured plastic / hard rubber grip | [Guide and presets](textured_grip/README.md) | [Preview](textured_grip/textured_grip_preview.png) |
 | Phosphated gun steel | [Guide and controls](phosphated_gun_steel/README.md) | [Preview](phosphated_gun_steel/phosphated_gun_steel_preview.png) |
+| Oily polished machinery steel | [Guide and controls](oily_polished_steel/README.md) | [Preview](oily_polished_steel/oily_polished_steel_preview.png) |
 
 Each material folder contains its generator, saved `.blend`, and render previews.
 Painted metal and machined metal also include test scripts. Open its `.blend` to inspect or append the material, or open
