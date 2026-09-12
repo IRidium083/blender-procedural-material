@@ -8,6 +8,7 @@ for controls and any bundled texture assets.
 
 | Material | Files | Preview |
 | --- | --- | --- |
+| Procedural wood and plywood | [Controls and design](wood/README.md) | [Cycles gallery](wood/wood_preview.png) |
 | Unified modular metal | [Presets and design](unified_metal/README.md) | [Cycles gallery](unified_metal/unified_metal_preview.png) |
 | Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | [Cycles](worn_painted_metal/recessed_metal_cycles.png) |
 | Machined metal | [Guide and controls](machined_metal/README.md) | [Cycles](machined_metal/machined_metal_preview.png) |

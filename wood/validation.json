@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "check": "Ring quarter period 0.625mm",
+      "value": 1.0
+    },
+    {
+      "check": "Ring three-quarter period 1.875mm",
+      "value": 0.0
+    },
+    {
+      "check": "Ring repeat 3.125mm",
+      "value": 1.0
+    },
+    {
+      "check": "Centimeter scene units preserve ring spacing",
+      "value": 1.0
+    },
+    {
+      "check": "First ply center",
+      "value": 1.0
+    },
+    {
+      "check": "Second ply center",
+      "value": 0.0
+    },
+    {
+      "check": "Third ply center",
+      "value": 1.0
+    },
+    {
+      "check": "Glue boundary",
+      "value": 1.0
+    },
+    {
+      "check": "Inside ply no glue",
+      "value": 0.0
+    },
+    {
+      "check": "Glue disabled",
+      "value": 0.0
+    }
+  ],
+  "geometry": "240mm boards; 18mm plywood; explicit veneer faces",
+  "renderers": [
+    "Cycles",
+    "Eevee"
+  ]
+}
