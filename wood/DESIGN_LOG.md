@@ -93,6 +93,57 @@ https://github.com/blender/blender/blob/main/intern/cycles/kernel/svm/wave.h
 The gallery contains 240 mm boards and an 18 mm panel with 1.5 mm plies.
 Natural wood uses broad and fine coordinate distortion, narrow latewood color,
 and fine elongated noise for pore roughness and shallow relief.
-Knots, species-specific anatomy, varnish, and automatic face classification remain
+Knots, species-specific anatomy and automatic face classification remain
 future improvements. Distortion intentionally changes local ring spacing; the
 spacing test checks the undistorted reference field.
+
+
+## Shared clear finish update
+
+Wood and FRP now consume shared/surface_finish.py. Clear Paint and Wax use a
+Principled coat with independent top-surface normals; image scratches and
+procedural smudges vary the coat, and dust is mixed over it. The scratch mask
+is generated, stored once under shared/textures, and packed into both scenes.
+Tests cover coat presets, disabled effects, smudge response and packed image data.
+
+
+## Species-inspired presets
+
+Added Pine, Maple, Oak, Walnut, Ebony and Custom using native menu routing.
+Preset values do not mutate Custom inputs or shared coating controls. Added
+elongated Voronoi vessel pores with diffuse/ring-concentrated distribution,
+optional ray flecks, ring contrast, and resolved-parameter debug outputs.
+The gallery compares five appearances and plywood; all remain artistic presets.
+No additional image map was necessary for this version.
+
+
+## Simplified material interfaces
+
+1. Kept the approved species palettes and finish defaults. Retained the full
+   structure group as Custom Wood for advanced authoring.
+2. Created Pine, Maple, Oak, Walnut and Ebony Wood wrappers around that same
+   master. Split plywood into Plywood Face and Plywood Edge; only the edge
+   exposes physical ply thickness. Enabled fake users so Custom Wood survives
+   saving without a preview object. No asset marking is used.
+3. Reduced everyday inputs to Color Tint, Grain Scale, Grain Direction,
+   Grain Detail, Finish, Surface Wear and Dust. The native finish menu uses
+   None for raw wood. Maple retains its straight grain and softer wax coating.
+4. Applied tint after solid/plywood color selection. Scaled only grain coordinates,
+   keeping layer thickness and the shared surface finish in physical millimeters.
+   Combined fine fiber color, roughness variation, pores, ray flecks and relief
+   under Grain Detail; main ring contrast remains part of the species identity.
+5. Combined image scratch strength and handling smudges under Surface Wear,
+   preserving the previous default ratio. Kept dust independent. Hidden coating,
+   pore and warp tuning stays inside the wrapper/master, with no duplicated
+   structure or finish implementation. This is an interface simplification,
+   not a claim of faster shader rendering.
+6. Updated the Blender test to exercise public controls through temporary copied
+   wrappers and rendered diagnostic outputs. Check palette/coat preservation,
+   tint, detail, wear, dust, grain scaling/rotation, fixed ply scale, adjustable
+   ply thickness, and scene-unit conversion alongside the original tests.
+7. Regenerate wood.blend and the Cycles gallery, run test_material.py for numeric
+   checks and Eevee, inspect both previews, and record results in validation.json.
+
+For another material family, follow this pattern: keep a shared detailed core,
+expose only controls that change the visible result in that wrapper, split
+structurally different uses, and retain a clearly named advanced authoring material.

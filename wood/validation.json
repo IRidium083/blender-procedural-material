@@ -40,9 +40,255 @@
     {
       "check": "Glue disabled",
       "value": 0.0
+    },
+    {
+      "check": "Clear paint coat weight",
+      "value": 0.8500000238418579
+    },
+    {
+      "check": "Clear paint clean roughness",
+      "value": 0.1599999964237213
+    },
+    {
+      "check": "Wax softer reflection weight",
+      "value": 0.5525000095367432
+    },
+    {
+      "check": "Wax clean roughness",
+      "value": 0.37999996542930603
+    },
+    {
+      "check": "Finish disabled",
+      "value": 0.0
+    },
+    {
+      "check": "Disabled Scratch Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Disabled Smudge Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Disabled Dust Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Smudges alter top coat",
+      "value": 0.2710988223552704
+    },
+    {
+      "check": "Pine pore size",
+      "value": 0.03999999910593033
+    },
+    {
+      "check": "Pine ring contrast",
+      "value": 1.0
+    },
+    {
+      "check": "Pine light color red",
+      "value": 0.47999998927116394
+    },
+    {
+      "check": "Maple pore size",
+      "value": 0.059999994933605194
+    },
+    {
+      "check": "Maple ring contrast",
+      "value": 0.30000001192092896
+    },
+    {
+      "check": "Maple light color red",
+      "value": 0.5699999928474426
+    },
+    {
+      "check": "Oak pore size",
+      "value": 0.25
+    },
+    {
+      "check": "Oak ring contrast",
+      "value": 0.6499999761581421
+    },
+    {
+      "check": "Oak light color red",
+      "value": 0.3799999952316284
+    },
+    {
+      "check": "Walnut pore size",
+      "value": 0.14000000059604645
+    },
+    {
+      "check": "Walnut ring contrast",
+      "value": 0.550000011920929
+    },
+    {
+      "check": "Walnut light color red",
+      "value": 0.1599999964237213
+    },
+    {
+      "check": "Ebony pore size",
+      "value": 0.054999999701976776
+    },
+    {
+      "check": "Ebony ring contrast",
+      "value": 0.34999996423721313
+    },
+    {
+      "check": "Ebony light color red",
+      "value": 0.017999999225139618
+    },
+    {
+      "check": "Custom pore size restored",
+      "value": 0.18000000715255737
+    },
+    {
+      "check": "Custom contrast restored",
+      "value": 0.41999998688697815
+    },
+    {
+      "check": "Custom vessel pores disabled",
+      "value": 0.0
+    },
+    {
+      "check": "Pine simplified palette",
+      "value": 0.47999998927116394
+    },
+    {
+      "check": "Pine simplified finish",
+      "value": 0.8500000238418579
+    },
+    {
+      "check": "Maple simplified palette",
+      "value": 0.5699999928474426
+    },
+    {
+      "check": "Maple simplified finish",
+      "value": 0.48749998211860657
+    },
+    {
+      "check": "Oak simplified palette",
+      "value": 0.3799999952316284
+    },
+    {
+      "check": "Oak simplified finish",
+      "value": 0.8500000238418579
+    },
+    {
+      "check": "Walnut simplified palette",
+      "value": 0.1599999964237213
+    },
+    {
+      "check": "Walnut simplified finish",
+      "value": 0.8500000238418579
+    },
+    {
+      "check": "Ebony simplified palette",
+      "value": 0.017999999225139618
+    },
+    {
+      "check": "Ebony simplified finish",
+      "value": 0.8500000238418579
+    },
+    {
+      "check": "Oak untinted",
+      "value": 0.3685946464538574
+    },
+    {
+      "check": "Oak half tint",
+      "value": 0.1842973232269287
+    },
+    {
+      "check": "Simplified detail zero removes relief",
+      "value": 0.0
+    },
+    {
+      "check": "Simplified detail zero removes vessel color",
+      "value": 0.0
+    },
+    {
+      "check": "Simplified detail increases relief",
+      "value": 0.04399999976158142
+    },
+    {
+      "check": "Simplified clean Scratch Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Simplified clean Smudge Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Simplified clean Dust Mask",
+      "value": 0.0
+    },
+    {
+      "check": "Combined wear enables handling marks",
+      "value": 0.5049946308135986
+    },
+    {
+      "check": "Independent dust enabled",
+      "value": 0.5049946308135986
+    },
+    {
+      "check": "Simplified raw finish",
+      "value": 0.0
+    },
+    {
+      "check": "Simplified wax finish",
+      "value": 0.5525000095367432
+    },
+    {
+      "check": "Grain Scale doubles ring period",
+      "value": 1.0
+    },
+    {
+      "check": "Grain Scale preserves physical ply centers",
+      "value": 1.0
+    },
+    {
+      "check": "Grain Scale preserves glue boundaries",
+      "value": 1.0
+    },
+    {
+      "check": "Public ply thickness moves glue boundary",
+      "value": 1.0
+    },
+    {
+      "check": "Public ply thickness moves ply center",
+      "value": 0.0
+    },
+    {
+      "check": "Public grain direction rotates pattern",
+      "value": 1.0
+    },
+    {
+      "check": "Simplified centimeter scene conversion",
+      "value": 1.0
     }
   ],
   "geometry": "240mm boards; 18mm plywood; explicit veneer faces",
+  "public_inputs": {
+    "solid_wood_and_plywood_face": [
+      "Color Tint",
+      "Grain Scale",
+      "Grain Direction",
+      "Grain Detail",
+      "Finish",
+      "Surface Wear",
+      "Dust"
+    ],
+    "plywood_edge_extra": "Ply Thickness mm"
+  },
+  "materials": [
+    "Pine Wood",
+    "Maple Wood",
+    "Oak Wood",
+    "Walnut Wood",
+    "Ebony Wood",
+    "Plywood Face",
+    "Plywood Edge",
+    "Custom Wood"
+  ],
   "renderers": [
     "Cycles",
     "Eevee"

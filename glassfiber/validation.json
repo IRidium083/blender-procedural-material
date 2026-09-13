@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "check": "Zero density removes fibers",
+      "coverage": 0.0
+    },
+    {
+      "check": "Sparse chopped fibers",
+      "coverage": 0.008155745803378522
+    },
+    {
+      "check": "Seed changes fiber locations",
+      "coverage": 0.007814072101609781
+    },
+    {
+      "check": "Wider fibers increase coverage",
+      "coverage": 0.025876945182972122
+    },
+    {
+      "check": "Zero visibility embeds fibers invisibly",
+      "coverage": 0.0
+    }
+  ]
+}

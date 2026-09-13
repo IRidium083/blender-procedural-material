@@ -8,6 +8,7 @@ for controls and any bundled texture assets.
 
 | Material | Files | Preview |
 | --- | --- | --- |
+| Fiberglass reinforced plastic | [Controls and usage](glassfiber/README.md) | [Cycles gallery](glassfiber/glassfiber_preview.png) |
 | Procedural wood and plywood | [Controls and design](wood/README.md) | [Cycles gallery](wood/wood_preview.png) |
 | Unified modular metal | [Presets and design](unified_metal/README.md) | [Cycles gallery](unified_metal/unified_metal_preview.png) |
 | Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | [Cycles](worn_painted_metal/recessed_metal_cycles.png) |
@@ -25,6 +26,7 @@ Shared root files:
 
 - `test.blend`: reusable base scene for generating previews.
 - `preview_utils.py`: common studio lights, camera placement, and render settings.
+- `shared/surface_finish.py`: clear finish, image scratches, smudges and dust reused by wood and FRP.
 - `.gitignore` and `.gitattributes`: repository settings.
 
 Run these commands from this project root in PowerShell:
