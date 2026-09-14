@@ -52,6 +52,11 @@ def make_material(plastic=False):
         ("Handling Wear", "NodeSocketFloat", 0.16, (0, 1)),
         ("Edge Width", "NodeSocketFloat", 0.001, (0.00001, 0.05)),
         ("Texture Roughness", "NodeSocketFloat", 0.12, (0, 0.5)),
+        ("Mould Line", "NodeSocketBool", False, None),
+        ("Mould Width", "NodeSocketFloat", 0.0008, (0.00001, 0.01)),
+        ("Mould Height", "NodeSocketFloat", 0.0002, (0, 0.003)),
+        ("Mould Offset", "NodeSocketFloat", 0.0, (-1, 1)),
+        ("Mould Plane Normal", "NodeSocketVector", (1, 0, 0), None),
     ]:
         s = group.interface.new_socket(name=title, in_out="INPUT", socket_type=kind)
         s.default_value = value
@@ -157,12 +162,57 @@ def make_material(plastic=False):
     link(inp, "Meters Per Unit", depth_units, 1)
     link(depth_units, 0, bump, "Distance")
     link(micro, "Normal", bump, "Normal")
+    # Distance to a parting plane through the local origin, in meters. This
+    # follows the front, back and rounded ends without UVs or another image.
+    plane_normal = node("ShaderNodeVectorMath", "Parting Plane Normal", -1300, -1400)
+    plane_normal.operation = "NORMALIZE"
+    link(inp, "Mould Plane Normal", plane_normal, 0)
+    plane = node("ShaderNodeVectorMath", "Distance Along Parting Normal", -1050, -1400)
+    plane.operation = "DOT_PRODUCT"
+    link(metric, "Vector", plane, 0)
+    link(plane_normal, "Vector", plane, 1)
+    offset = math("Parting Plane Offset", "SUBTRACT", -800, -1400)
+    link(plane, "Value", offset, 0)
+    link(inp, "Mould Offset", offset, 1)
+    absolute = math("Distance to Parting Plane", "ABSOLUTE", -550, -1400)
+    link(offset, 0, absolute, 0)
+    half_width = math("Mould Half Width", "MULTIPLY", -800, -1700, 0.5)
+    link(inp, "Mould Width", half_width, 0)
+    safe_width = math("Safe Mould Width", "MAXIMUM", -550, -1700, 0.000005)
+    link(half_width, 0, safe_width, 0)
+    normalized = math("Normalized Seam Distance", "DIVIDE", -300, -1400)
+    link(absolute, 0, normalized, 0)
+    link(safe_width, 0, normalized, 1)
+    ridge = math("Mould Ridge Profile", "SUBTRACT", -50, -1400)
+    ridge.inputs[0].default_value = 1
+    ridge.use_clamp = True
+    link(normalized, 0, ridge, 1)
+    rounded = math("Rounded Mould Ridge", "POWER", 200, -1400, 2)
+    link(ridge, 0, rounded, 0)
+    enabled = math("Optional Mould Mask", "MULTIPLY", 450, -1400)
+    link(rounded, 0, enabled, 0)
+    link(inp, "Mould Line", enabled, 1)
+    # Reduce the coarse stipple at the ridge so the parting line reads cleanly.
+    flatten = math("Smooth Mould Ridge", "MULTIPLY", 200, -1700, 0.85)
+    link(enabled, 0, flatten, 0)
+    remaining = math("Remaining Stipple at Seam", "SUBTRACT", 450, -1700)
+    remaining.inputs[0].default_value = 1
+    link(flatten, 0, remaining, 1)
+    seam_depth = math("Stipple with Mould Line", "MULTIPLY", 700, -1700)
+    link(depth_units, 0, seam_depth, 0)
+    link(remaining, 0, seam_depth, 1)
+    link(seam_depth, 0, bump, "Distance")
+    seam_bump = node("ShaderNodeBump", "Raised Mould Parting Line", 750, -950)
+    seam_bump.inputs["Strength"].default_value = 0.65
+    link(enabled, 0, seam_bump, "Height")
+    distance("Mould Height", seam_bump)
+    link(bump, "Normal", seam_bump, "Normal")
     shader = node("ShaderNodeBsdfPrincipled", "Nonmetallic Molded Grip", 750, 450)
     shader.inputs["Metallic"].default_value = 0
     shader.inputs["IOR"].default_value = 1.48
     link(variation, 0, shader, "Base Color")
     link(final_rough, 0, shader, "Roughness")
-    link(bump, "Normal", shader, "Normal")
+    link(seam_bump, "Normal", shader, "Normal")
     out = node("NodeGroupOutput", "Surface", 1050, 450)
     link(shader, "BSDF", out, "Shader")
     instance = mat.node_tree.nodes.new("ShaderNodeGroup")
@@ -177,6 +227,9 @@ def make_preview(directory, render):
     scene = bpy.data.scenes.new("Textured Grip Studio")
     bpy.context.window.scene = scene
     rubber, plastic = make_material(), make_material(True)
+    for material in (rubber, plastic):
+        instance = next(n for n in material.node_tree.nodes if n.type == "GROUP")
+        instance.inputs["Mould Line"].default_value = True
 
     def block(name, location, dimensions, mat, bevel):
         bpy.ops.mesh.primitive_cube_add(size=1, location=location)

@@ -12,6 +12,26 @@ API, `make_material(plastic=True)` builds the polymer preset. CLI supports `--pl
 The Shader Editor group exposes Base Color, Texture Scale, Texture Depth,
 Micro Grain, Roughness, Handling Wear, Edge Width, and Texture Roughness.
 
+## Optional mould parting line
+
+Enable **Mould Line** for a narrow raised seam at the center of the grip. It is
+off by default when generating a material and enabled on both preview samples.
+The seam is procedural; it uses no extra image or UV map.
+
+- **Mould Width:** full seam width, default 0.0008 m (0.8 mm).
+- **Mould Height:** bump relief, default 0.0002 m (0.2 mm).
+- **Mould Offset:** signed distance from the object's origin, in meters.
+- **Mould Plane Normal:** parting-plane orientation in local object space.
+  Default `(1, 0, 0)` gives the X=0 center plane: a vertical line down the front
+  and back of an upright grip, continuing over rounded ends. Use `(0, 1, 0)`
+  for a seam along the sides instead. Use a nonzero vector.
+
+Center the object origin on the intended parting plane, or adjust Mould Offset.
+Apply object scale to keep the physical width consistent. Separate pieces need
+aligned local planes if the seam should continue across them. Texture Scale does
+not affect seam width. Stipple is reduced on the seam to make it read as a mould
+ridge. This is bump shading, so it does not add geometry or change the silhouette.
+
 Higher Texture Scale produces smaller pebbles. Higher Texture Depth strengthens
 the stipple. Set Handling Wear to zero for a fresh molding. Use Roughness around
 0.45 for hard plastic or 0.65–0.75 for matte rubber. Both are visual presets:
@@ -38,7 +58,7 @@ screen-space AO may give different handling-wear masks. Edge Width is entered in
 Regenerate the separate preview scene from this folder:
 
 ```powershell
-& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' -b ../test.blend --python-exit-code 1 -P textured_grip.py -- --preview --render
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --factory-startup -b --python-exit-code 1 -P textured_grip.py -- --preview --render
 ```
 
 The preview saves `textured_grip.blend` and `textured_grip_preview.png` here and
