@@ -1,0 +1,163 @@
+{
+  "blender": "5.2.1 LTS",
+  "passed": true,
+  "pure_procedural": true,
+  "image_texture_nodes": 0,
+  "pattern_groups": [
+    "Type 1 - Fragments",
+    "Type 2 - Flow"
+  ],
+  "shared_resin_group": "Shared - Molded Resin Surface v1",
+  "materials": [
+    "Bakelite - Type 1 Amber",
+    "Bakelite - Type 1 Dark",
+    "Bakelite - Type 2 Brown",
+    "Bakelite - Type 2 Golden"
+  ],
+  "public_controls": [
+    "Resin Color",
+    "Filler Color",
+    "Pattern Scale",
+    "Pattern Amount",
+    "Direction",
+    "Seed",
+    "Roughness",
+    "Polish"
+  ],
+  "checks": [
+    {
+      "check": "Type 1 - Fragments varied pattern",
+      "mean": 0.05731613530754262,
+      "variance": 0.005616768924875508
+    },
+    {
+      "check": "Type 1 - Fragments new seed",
+      "mean": 0.05714970629539377,
+      "variance": 0.006066341937607841
+    },
+    {
+      "check": "Type 1 - Fragments doubled pattern size",
+      "mean": 0.05289015980940602,
+      "variance": 0.0066253539020664385
+    },
+    {
+      "check": "Type 1 - Fragments rotated pattern",
+      "mean": 0.05270213046938315,
+      "variance": 0.006677540422844052
+    },
+    {
+      "check": "Type 1 - Fragments hidden filler",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments solid resin color",
+      "mean": 0.10000000149011612,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments editable resin palette",
+      "mean": 0.07999999821186066,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments uneven surface gloss",
+      "mean": 0.3200262670070515,
+      "variance": 4.2065188773679574e-05
+    },
+    {
+      "check": "Type 1 - Fragments roughness adjustment",
+      "mean": 0.6000262986162852,
+      "variance": 4.2065190470291365e-05
+    },
+    {
+      "check": "Type 1 - Fragments meter point 0",
+      "mean": 0.061223581433296204,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments centimeter point 0",
+      "mean": 0.061223581433296204,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments meter point 1",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments centimeter point 1",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow varied pattern",
+      "mean": 0.10570518937352438,
+      "variance": 0.00956121534268314
+    },
+    {
+      "check": "Type 2 - Flow new seed",
+      "mean": 0.11436200933516533,
+      "variance": 0.013286539789852385
+    },
+    {
+      "check": "Type 2 - Flow doubled pattern size",
+      "mean": 0.10645935295254794,
+      "variance": 0.012360180073590271
+    },
+    {
+      "check": "Type 2 - Flow rotated pattern",
+      "mean": 0.10654322361837412,
+      "variance": 0.012230454501211564
+    },
+    {
+      "check": "Type 2 - Flow hidden filler",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow solid resin color",
+      "mean": 0.10000000149011612,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow editable resin palette",
+      "mean": 0.07999999821186066,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow uneven surface gloss",
+      "mean": 0.3200262670070515,
+      "variance": 4.2065188773679574e-05
+    },
+    {
+      "check": "Type 2 - Flow roughness adjustment",
+      "mean": 0.6000262986162852,
+      "variance": 4.2065190470291365e-05
+    },
+    {
+      "check": "Type 2 - Flow meter point 0",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow centimeter point 0",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow meter point 1",
+      "mean": 0.19511854648590088,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow centimeter point 1",
+      "mean": 0.19511854648590088,
+      "variance": 0.0
+    }
+  ],
+  "renderers": [
+    "Cycles",
+    "Eevee"
+  ]
+}
