@@ -7,7 +7,7 @@
     "Type 1 - Fragments",
     "Type 2 - Flow"
   ],
-  "shared_resin_group": "Shared - Molded Resin Surface v1",
+  "shared_resin_group": "Shared - Molded Resin Surface v2",
   "materials": [
     "Bakelite - Type 1 Amber",
     "Bakelite - Type 1 Dark",
@@ -22,9 +22,20 @@
     "Direction",
     "Seed",
     "Roughness",
-    "Polish"
+    "Polish",
+    "Dust"
   ],
   "checks": [
+    {
+      "check": "Type 1 - Fragments clean deposits",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 1 - Fragments enabled shared dust",
+      "mean": 0.46877939390878964,
+      "variance": 0.06439222966595184
+    },
     {
       "check": "Type 1 - Fragments varied pattern",
       "mean": 0.05731613530754262,
@@ -89,6 +100,16 @@
       "check": "Type 1 - Fragments centimeter point 1",
       "mean": 0.0,
       "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow clean deposits",
+      "mean": 0.0,
+      "variance": 0.0
+    },
+    {
+      "check": "Type 2 - Flow enabled shared dust",
+      "mean": 0.46877939390878964,
+      "variance": 0.06439222966595184
     },
     {
       "check": "Type 2 - Flow varied pattern",

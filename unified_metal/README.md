@@ -1,104 +1,145 @@
-# Unified Metal v1
+# Unified Metal v2
 
-Three modular stages with native Blender 5.2 dropdowns:
-**base metal → surface finish → imperfections**. No add-on installation needed.
-Coatings, plating removal, and substrate reveal are reserved for a future version.
+Separate manufacturing finishes with a shared base-metal palette and shared
+surface imperfections. Native Blender 5.2 nodes; no add-on or UV unwrap required.
 
-![Six material combinations in Cycles](unified_metal_preview.png)
+![Metal finish gallery in Cycles](unified_metal_preview.png)
 
-## Use
+## Choose a material
 
-Open `unified_metal.blend`, select a sample, and open the Shader Editor. Its
-**Unified Metal** group has four organized panels. Dropdown values are real
-named menu choices, not numeric codes. You can also append the marked material
-assets using File → Append → unified_metal.blend → Material.
+Open `unified_metal.blend`, or use File > Append > Material to bring a material
+into another scene. Each material has a **Metal Controls** node.
 
-For another scene, open `unified_metal.py` in the Text Editor, select one or more
-meshes, and Run Script. It assigns one shared material to the selected meshes;
-make a material single-user if you want different settings per object.
-Enter the main group to inspect the three submodules and shader assembly.
+| Material | Structure | Everyday inputs |
+| --- | --- | --- |
+| UM Polished Metal | Smooth reflective finish with microscopic isotropic relief | 7 |
+| UM Brushed Metal | Stretched directional grain and anisotropy | 9 |
+| UM Cast Metal | Isotropic grain and shallow cast relief | 9 |
+| UM Stonewashed Metal | Broader nonlinear dent pattern | 9 |
+| UM Machined Metal | Turning bands in color, roughness and anisotropy; no groove bump | 10 |
+| UM Custom Metal | Advanced isotropic authoring material with direct metal color | Full controls |
 
-| Panel / control | Choices or purpose |
+The former Finish dropdown is replaced by these materials. Each has a dedicated
+finish group containing only its own pattern, rather than another wrapper around
+the old all-finish switch. The ordinary materials retain **Base Metal** (Steel,
+Aluminum, Bronze, Copper), because these choices share the same shader structure
+and change only the palette. Use Color Tint to adjust the palette, or Custom Metal
+for a directly editable metal color.
+
+The saved gallery uses Steel/Polished, Aluminum/Brushed, Bronze/Cast with dust,
+Copper/Stonewashed, Steel/Machined with oil, and Custom with dust and oil. These
+are starting settings on the six materials, not six additional shader schemes.
+Materials use fake users so unused materials remain saved; they are not marked
+as Blender assets.
+
+## Controls
+
+| Control | Purpose |
 | --- | --- |
-| Base Metal | Steel, Aluminum, Bronze, Copper, Custom |
-| Custom Metal Color | Only controls appearance when Base Metal is Custom |
-| Finish | Polished, Brushed, Cast, Stonewashed, Machined, Custom |
-| Texture Size | Fine (0.15 mm), Medium (0.5 mm), Coarse (1.2 mm), Custom |
-| Custom Grain mm | Texture size when Texture Size is Custom |
-| Custom Roughness / Relief / Anisotropy | Used when Finish is Custom |
-| Direction Rotation | Euler rotation in radians for finish coordinates |
-| Finish Seed | Change pattern placement without changing its size |
-| Wear Level | None, Light, Moderate, Heavy, Custom |
-| Custom Wear | Used when Wear Level is Custom |
-| Wear Width mm | Width of convex edge polish |
-| Scratches + Amount / Width / Depth | Independent toggle and scratch controls |
-| Dust + Amount / Color / Spread | Independent cavity and upward-surface deposits |
-| Oil + Amount / Tint / Patch size | Independent oily wipe stains |
-| Imperfection Seed | Separate pattern placement for surface contamination |
-| Scene Unit m | Meters per Blender unit; initialized from the scene on creation |
-| View | Material, Roughness, Wear Mask, Scratch Mask, Dust Mask, Oil Mask |
+| Base Metal | Metal palette; shared by all five everyday materials |
+| Color Tint | Multiplies the chosen metal color; white preserves the palette |
+| Roughness | Overall finish roughness before wear, oil and dust |
+| Grain Scale | Pattern size multiplier, for textured finishes; 1 uses the 0.5 mm reference coordinate scale |
+| Direction | Grain-coordinate rotation for Brushed and Machined |
+| Surface Detail | Cast/Stonewashed detail strength, or Machined color/roughness/anisotropy variation |
+| Edge Wear | Convex-edge polishing amount; 0 disables it |
+| Surface Wear | Combined image scratches and handling smudges; 0 disables both |
+| Dust | Surface and cavity dust amount; 0 disables it |
+| Oil | Image-based oily film/stain amount; 0 disables it |
 
-**Preset mode does not overwrite Custom inputs.** Switching back to Custom
-restores their effect. Custom finish currently uses isotropic grain, with manual
-roughness, relief and anisotropy. Brush and turning-pattern orientation remains
-an independent control. Custom controls may remain visible while inactive.
+Polished omits Grain Scale, Direction and Surface Detail. Brushed omits Surface
+Detail. Cast and Stonewashed omit Direction. Replaced the old size/wear dropdowns
+and separate enable toggles with direct controls. All four imperfection amounts
+are independent: set Edge Wear, Surface Wear, Dust and Oil to 0 for a clean finish.
 
-## Scale and behavior
+## Shared surface imperfections
 
-Use consistently applied object scale: coordinates are object-space, converted
-to millimeters. Mesh dimensions and scene unit scale determine physical texture
-size. The sample blocks are 48 × 44 × 36 mm. Set Scene Unit m again if you later
-change the scene's unit scale. Nonuniform unapplied scale stretches the texture.
+All six materials reference one **UM v2 | Metal Imperfections** group. It uses
+**Shared - Surface Marks v1** for image scratches and handling smudges, plus
+**Shared - Deposit Coverage v1** for surface dust. Wood and fiberglass reinforced
+plastic use these same fields.
 
-Wear polishes convex edges and smooths their relief; scratches cut into the
-current finish. Neither exposes another substrate. Dust is a rough nonmetallic
-surface mixed over the metal. Oil tints the reflective surface and adds a glossy
-optical film. Its internal Principled coat input is a lubricant approximation,
-not the deferred manufacturing-coating or reveal system.
+Metal consumes the shared **masks**, applying scratches to bare-metal roughness
+and shallow bump, and smudges to roughness. It does not attach the wood clear coat.
+Surface Wear drives scratch strength and smudge strength together, using the same
+1:1.2 ratio as the simplified wood controls, clamped at 1.
 
-Default order: finish → wear/scratches → oil → dust. Dust covers oil where masks
-overlap. Effects are independent: Wear Level=None does not disable Scratches,
-Dust or Oil. Disable each toggle for a pristine surface.
+Metal-specific effects remain in one common adapter: geometric convex-edge polish,
+additional cavity dust, and an oil-smear image controlling color, roughness and a
+Principled lubricant coat. **Shared - Surface Deposits v1** receives the final metal shader and adds
+nonmetallic dust using that combined coverage.
+The order remains finish > edge polish/scratches/smudges > oil > dust. None of
+these effects removes plating or exposes another substrate.
 
-Brushed grain follows local X; machined bands wrap around local Z. Direction
-Rotation rotates the sampling coordinates. Complex tool paths, general radial
-machining and object-specific tangents are outside this first version.
+Two Non-Color images are packed in the blend:
 
-Metal colors and finish values are artistic presets, not measured alloy spectra.
-There is no rust or oxide chemistry, bulk deformation, coating removal, or
-silhouette displacement. Fine relief is bump shading.
+- `../shared/textures/clear_finish_scratches.png`: shared scratch mask; blended box projection.
+- `textures/oil_smear_mask.png`: existing oil-smear mask; blended box projection.
 
-## Texture and compatibility
+No new images are required. Grain, edge polish, smudges and dust are node-based.
+See [scratch source](../shared/textures/SOURCE.md) and [oil source](textures/SOURCE.md).
+The shared Python implementation and generator are embedded for regeneration;
+appended materials render without running Python or locating external images.
 
-The only image is `textures/oil_smear_mask.png`, reused from this project's oily
-steel material. It uses Non-Color data and blended box projection, and is packed
-in the blend. All other patterns and masks are nodes. No UV unwrap required.
-Keep `textures/` beside the standalone script. Rebuilding from the supplied
-blend can use its packed image even without the external PNG. See
-[texture provenance](textures/SOURCE.md).
+## Physical scale and orientation
 
-Cycles is the reference renderer. Eevee can render the gallery, but cavity/edge
-AO and directional reflections can differ. AO needs real geometry and can be
-affected by neighboring surfaces; bump scratches cannot generate AO cavities.
-No add-on, update handler, or Python execution is needed to use the saved menus.
+Apply object scale with Ctrl+A > Scale. Object coordinates are converted to
+millimeters, so a 20 cm object has appropriately small finish patterns when its
+actual dimensions are 20 cm. The gallery blocks are 48 x 44 x 36 mm.
+
+Grain Scale changes only manufacturing texture coordinates. Scratch repeat size,
+edge-wear width, oil patches and dust spread remain in physical millimeters.
+The reference Grain mm is a noise-coordinate size, not a measured groove period.
+
+Brushed grain runs along local X. Machined bands follow local Z levels with a
+circumferential tangent around local Z, rotated by Direction. Tangents use the
+inverse coordinate rotation, object-to-world conversion and surface projection.
+Stable fallbacks cover the turning axis and directions perpendicular to a face.
+These are simplified turning marks, not arbitrary milling paths or radial face
+machining. Machining marks have no height even at high Surface Detail; independent
+scratches can still add shallow bump.
+
+After appending into a scene with a different Unit Scale, Tab into Metal Controls
+and set **Advanced Metal Settings > Scene Unit m** to that scale. A meter-based
+scene uses 1, even if its display unit is centimeters. This internal setting is
+shared by all users of that wrapper. Custom Metal exposes it directly.
+
+## Advanced editing and limitations
+
+Tab into an everyday group to adjust hidden finish tuning, seed, anisotropy,
+scratch tile/depth, wear width, dust spread/color and oil patch/tint. Make that
+wrapper single-user first for material-specific overrides; copying only a material
+still shares its node groups. Changing a shared structure or imperfection group
+affects all its users. Custom Metal exposes authoring controls directly and uses
+an isotropic grain structure; there is no inactive Custom mode on everyday menus.
+
+Diagnostic outputs are inside the material core instead of a public View dropdown.
+Connect Roughness or the named mask outputs to emission when debugging.
+
+Colors and finish values are artistic presets, not measured alloy spectra. Relief
+uses bump shading. AO-based edge wear and cavity dust depend on real geometry and
+neighboring surfaces; Cycles and Eevee can differ. Rust, coating removal, geometric
+damage and measured reflectance are outside this implementation.
 
 ## Regenerate and test
 
-From this folder in PowerShell:
+From the repository root in PowerShell:
 
 ```powershell
-$blender = 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe'
-& $blender --factory-startup -b ../test.blend --python-exit-code 1 -P unified_metal.py -- --preview --render
-& $blender --factory-startup -b unified_metal.blend --python-exit-code 1 -P test_material.py -- --render-eevee
+$blender = 'C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe'
+& $blender --factory-startup -b --python-exit-code 1 -P unified_metal/unified_metal.py -- --preview --render
+& $blender --factory-startup -b unified_metal/unified_metal.blend --python-exit-code 1 -P unified_metal/test_material.py -- --render-eevee
 ```
 
-The generator creates a separate gallery scene and embeds its source in the
-saved blend. It leaves `test.blend` unchanged. The test reads the embedded source,
-checks actual menu-driven shader values through small EXR renders, verifies
-Custom preservation and disabled masks, and writes `validation.json`. It can
-also render `unified_metal_eevee.png`; it does not overwrite the saved scene.
+Run unified_metal.py in Blender's Text Editor with selected meshes to assign
+Polished Metal. Keep the shared folder beside material folders to regenerate
+from disk. Preview generation saves the blend, generator, packed textures and
+Cycles gallery; testing writes validation.json and the Eevee gallery without
+changing the saved scene.
 
-Gallery, back row: Steel/Polished, Aluminum/Brushed, Bronze/Cast with dust.
-Front row: Copper/Stonewashed, Steel/Machined with oil, Custom with dust and oil.
+Tests check separate finish implementations, small interfaces, shared module
+identity, metal palettes, finish roughness, zero machining height, machining color
+and anisotropy, rotated world-space tangents, disabled/enabled imperfections, exact
+shared scratch-mask agreement, public tint/detail controls and physical scale.
 
-See [DESIGN_LOG.md](DESIGN_LOG.md) for the accepted design and future roadmap.
+[Design and implementation log](DESIGN_LOG.md).

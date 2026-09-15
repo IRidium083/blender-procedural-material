@@ -6,7 +6,7 @@ import bpy
 
 DIRECTORY = Path(__file__).resolve().parent
 gallery = bpy.context.scene
-shared_finish = next(g for g in bpy.data.node_groups if g.get('shared_finish_version') == 2)
+shared_finish = next(g for g in bpy.data.node_groups if g.get('surface_marks_version') == 1)
 scratch_image = shared_finish.nodes['Shared Scratch Image'].image
 assert scratch_image.packed_file and len(scratch_image.pixels) > 0
 assert scratch_image.colorspace_settings.name == 'Non-Color'

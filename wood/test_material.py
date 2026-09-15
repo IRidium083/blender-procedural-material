@@ -9,7 +9,7 @@ import bpy
 
 DIRECTORY = Path(__file__).resolve().parent
 gallery = bpy.context.scene
-shared_finish = next(g for g in bpy.data.node_groups if g.get('shared_finish_version') == 2)
+shared_finish = next(g for g in bpy.data.node_groups if g.get('surface_marks_version') == 1)
 scratch_image = shared_finish.nodes['Shared Scratch Image'].image
 assert scratch_image.packed_file and len(scratch_image.pixels) > 0
 assert scratch_image.colorspace_settings.name == 'Non-Color'
@@ -103,7 +103,7 @@ sample('Glue disabled', 'Glue Mask', (0, 0, 1.5), expected=0)
 # Clear finish is layered over wood; imperfections are independent controls.
 shared = master.nodes['Shared Surface Finish'].node_tree
 assert master.nodes['Sanded Wood'].inputs['Coat Normal'].links[0].from_node.name == 'Shared Surface Finish'
-assert master.nodes['Dust over Finished Surface'].inputs[2].links[0].from_node.name == 'Dust above Clear Finish'
+assert master.nodes['Shared Surface Deposits'].inputs['Surface'].links[0].from_node.name == 'Sanded Wood'
 assert shared.nodes['Scratches in Top Finish'].inputs['Normal'].links[0].from_node.name == 'Uncoated Geometry'
 group.inputs['Surface Scratches'].default_value = 0
 group.inputs['Smudges'].default_value = 0

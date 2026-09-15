@@ -2,13 +2,22 @@
 The caller supplies its Graph class (node/input/output/set/math/mix/noise/layout).
 """
 import bpy
+try:
+    from shared.surface_finish import build_deposits_group
+except ModuleNotFoundError:
+    source = bpy.data.texts.get('shared_surface_finish.py')
+    if source is None:
+        raise RuntimeError('Keep shared/surface_finish.py beside resin_finish.py.')
+    namespace = {'__name__':'shared_surface_finish'}
+    exec(source.as_string(),namespace)
+    build_deposits_group = namespace['build_deposits_group']
 
-NAME = 'Shared - Molded Resin Surface v1'
+NAME = 'Shared - Molded Resin Surface v2'
 
 
 def build_group(Graph):
     existing = bpy.data.node_groups.get(NAME)
-    if existing and existing.get('resin_finish_version') == 1:
+    if existing and existing.get('resin_finish_version') == 2:
         return existing
     g = Graph(NAME)
     color = g.input('Base Color',(0.2,0.06,0.01,1),'Color')
@@ -35,8 +44,13 @@ def build_group(Graph):
     g.set(shader.inputs['Coat Weight'],polish)
     geometry = g.node('ShaderNodeNewGeometry','Smooth Resin Skin')
     g.set(shader.inputs['Coat Normal'],geometry.outputs['Normal'])
-    g.output('Shader',shader.outputs[0],'Shader')
+    deposits = g.node('ShaderNodeGroup','Shared Surface Deposits')
+    deposits.node_tree = build_deposits_group()
+    for name,value in [('Surface',shader.outputs[0]),('Coordinates mm',xyz),('Dust',g.input('Dust',0,limits=(0,1)))]:
+        g.set(deposits.inputs[name],value)
+    g.output('Shader',deposits.outputs['Shader'],'Shader')
+    g.output('Dust Mask',deposits.outputs['Dust Mask'])
     g.output('Roughness',r)
-    g.tree['resin_finish_version'] = 1
+    g.tree['resin_finish_version'] = 2
     g.layout()
     return g.tree

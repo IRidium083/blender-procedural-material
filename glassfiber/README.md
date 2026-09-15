@@ -80,3 +80,11 @@ and Surface Dust default to zero for FRP. Enable them to add imperfections above
 its resin finish. Scratches use the packed image in `shared/textures/`; tile size
 is in mm. Keep the shared folder for regeneration. Existing embedded node groups
 need no Python files to render.
+
+## Shared imperfection module update
+
+Scratches and smudges now come from **Shared - Surface Marks v1** and feed the
+material's **Clear Finish Response v3** before the BSDF. **Shared - Surface
+Deposits v1** accepts the finished shader and applies dust afterward. Both stages
+reuse the same procedural patch field, also used by unified metal and Bakelite.
+Existing controls and defaults are preserved. See [shared module wiring](../shared/README.md).

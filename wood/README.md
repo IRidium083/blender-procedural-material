@@ -124,3 +124,11 @@ and the packed scratch texture. They render numeric Cycles EXRs and an Eevee
 gallery, then write validation.json without changing the saved gallery.
 
 [Plan and implementation log](DESIGN_LOG.md).
+
+## Shared imperfection module update
+
+Scratches and smudges now come from **Shared - Surface Marks v1** and feed the
+material's **Clear Finish Response v3** before the BSDF. **Shared - Surface
+Deposits v1** accepts the finished shader and applies dust afterward. Both stages
+reuse the same procedural patch field, also used by unified metal and Bakelite.
+Existing controls and defaults are preserved. See [shared module wiring](../shared/README.md).

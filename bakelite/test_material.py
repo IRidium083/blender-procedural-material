@@ -8,7 +8,7 @@ DIRECTORY = Path(__file__).resolve().parent
 gallery = bpy.context.scene
 materials = [m for m in bpy.data.materials if m.get('bakelite_version') == 1]
 assert len(materials) == 4
-public_names = ['Resin Color','Filler Color','Pattern Scale','Pattern Amount','Direction','Seed','Roughness','Polish']
+public_names = ['Resin Color','Filler Color','Pattern Scale','Pattern Amount','Direction','Seed','Roughness','Polish','Dust']
 cores = {}
 for material in materials:
     assert material.use_fake_user and not material.asset_data
@@ -100,6 +100,11 @@ for name,core in cores.items():
     for socket in core.interface.items_tree:
         if socket.item_type == 'SOCKET' and socket.in_out == 'INPUT':
             node.inputs[socket.name].default_value = socket.default_value
+    sample(name+' clean deposits','Dust Mask',(0,0,0))
+    node.inputs['Dust'].default_value = 1
+    _,dust_mean,_ = sample(name+' enabled shared dust','Dust Mask')
+    assert dust_mean > .01
+    node.inputs['Dust'].default_value = 0
     original,mean,variance = sample(name+' varied pattern')
     assert .005 < mean < .7 and variance > .0005,(name,mean,variance)
     node.inputs['Seed'].default_value = 12

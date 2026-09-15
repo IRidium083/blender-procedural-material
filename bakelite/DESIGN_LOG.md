@@ -46,3 +46,14 @@ No image texture was needed for this procedural first pass. The patterns reprodu
 the distinction between fragment-rich and flowing resin appearances. Exact shaped
 filler flakes and photograph-specific flow would need further art direction or a
 pattern mask; introduce one only if that becomes necessary after review.
+
+
+## Shared marks and final deposits
+
+Separated masks from shader response in shared/surface_finish.py. Surface Marks
+outputs scratches/smudges for material-specific shading before the BSDF. Surface
+Deposits accepts the final shader and mixes dust above it, with optional external
+coverage for metal cavities. Both use one procedural patch-field implementation.
+Bakelite uses only procedural deposits, defaulting to zero dust. Regenerated the
+four consuming blend files and tested material behavior plus arbitrary-shader
+passthrough, full coverage and partial blending in Cycles and Eevee.

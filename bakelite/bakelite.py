@@ -156,6 +156,7 @@ def build_core(pattern):
     seed = g.input('Seed',3,limits=(0,1000))
     rough = g.input('Roughness',.32,limits=(.03,1))
     polish = g.input('Polish',.25,limits=(0,1))
+    dust = g.input('Dust',0,limits=(0,1))
     units = g.input('Scene Unit m',bpy.context.scene.unit_settings.scale_length,limits=(.000001,1000))
     coord = g.node('ShaderNodeTexCoord','Object Coordinates')
     mm = g.vector('SCALE',coord.outputs['Object'],g.math('MULTIPLY',units,1000),'Coordinates mm')
@@ -168,13 +169,14 @@ def build_core(pattern):
     color = g.mix(visible,dark,light,'Filler Inside Resin')
     finish = g.node('ShaderNodeGroup','Shared Resin Surface')
     finish.node_tree = resin_group(Graph)
-    for name,value in [('Base Color',color),('Coordinates mm',mm),('Scene Unit m',units),('Roughness',rough),('Polish',polish)]:
+    for name,value in [('Base Color',color),('Coordinates mm',mm),('Scene Unit m',units),('Roughness',rough),('Polish',polish),('Dust',dust)]:
         g.set(finish.inputs[name],value)
     g.output('Shader',finish.outputs['Shader'],'Shader')
     g.output('Pattern Mask',mask)
     g.output('Visible Pattern',visible)
     g.output('Base Color',color,'Color')
     g.output('Surface Roughness',finish.outputs['Roughness'])
+    g.output('Dust Mask',finish.outputs['Dust Mask'])
     g.layout()
     return g.tree
 
@@ -279,7 +281,7 @@ def preview(render):
     bpy.ops.object.select_all(action='DESELECT')
     bodies[0].select_set(True)
     bpy.context.view_layer.objects.active = bodies[0]
-    for name,path in [('bakelite.py',Path(__file__)),('shared_resin_finish.py',DIRECTORY.parent/'shared/resin_finish.py')]:
+    for name,path in [('bakelite.py',Path(__file__)),('shared_resin_finish.py',DIRECTORY.parent/'shared/resin_finish.py'),('shared_surface_finish.py',DIRECTORY.parent/'shared/surface_finish.py')]:
         text = bpy.data.texts.get(name) or bpy.data.texts.new(name)
         if path.exists():
             text.clear()

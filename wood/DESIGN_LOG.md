@@ -147,3 +147,14 @@ No additional image map was necessary for this version.
 For another material family, follow this pattern: keep a shared detailed core,
 expose only controls that change the visible result in that wrapper, split
 structurally different uses, and retain a clearly named advanced authoring material.
+
+
+## Shared marks and final deposits
+
+Separated masks from shader response in shared/surface_finish.py. Surface Marks
+outputs scratches/smudges for material-specific shading before the BSDF. Surface
+Deposits accepts the final shader and mixes dust above it, with optional external
+coverage for metal cavities. Both use one procedural patch-field implementation.
+Bakelite uses only procedural deposits, defaulting to zero dust. Regenerated the
+four consuming blend files and tested material behavior plus arbitrary-shader
+passthrough, full coverage and partial blending in Cycles and Eevee.

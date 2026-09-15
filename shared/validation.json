@@ -1,0 +1,186 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "engine": "CYCLES",
+      "check": "EMISSION direct",
+      "mean_rgb": [
+        0.19999994337558746,
+        0.3999998867511749,
+        0.7000001072883606
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "EMISSION zero deposits",
+      "mean_rgb": [
+        0.19999994337558746,
+        0.3999998867511749,
+        0.7000001072883606
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "BSDF_PRINCIPLED direct",
+      "mean_rgb": [
+        0.05570557922409433,
+        0.11725927027873695,
+        0.21456930113749373
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "BSDF_PRINCIPLED zero deposits",
+      "mean_rgb": [
+        0.05570557922409433,
+        0.11725927027873695,
+        0.21456930113749373
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "MIX_SHADER direct",
+      "mean_rgb": [
+        0.1494969684475412,
+        0.3010407763326334,
+        0.5300992042240169
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "MIX_SHADER zero deposits",
+      "mean_rgb": [
+        0.1494969684475412,
+        0.3010407763326334,
+        0.5300992042240169
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "Coverage 1 first incoming surface",
+      "mean_rgb": [
+        0.12695836309447056,
+        0.10733682058182442,
+        0.07790450284826672
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "Coverage 1 second incoming surface",
+      "mean_rgb": [
+        0.12695836309447056,
+        0.10733682058182442,
+        0.07790450284826672
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "Coverage 0.5 first incoming surface",
+      "mean_rgb": [
+        0.16347913074100184,
+        0.2536683361977339,
+        0.38895234481121105
+      ]
+    },
+    {
+      "engine": "CYCLES",
+      "check": "Coverage 0.5 second incoming surface",
+      "mean_rgb": [
+        0.4634790425706241,
+        0.10366838126598547,
+        0.1389522066908992
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "EMISSION direct",
+      "mean_rgb": [
+        0.199951171875,
+        0.39990234375,
+        0.69970703125
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "EMISSION zero deposits",
+      "mean_rgb": [
+        0.199951171875,
+        0.39990234375,
+        0.69970703125
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "BSDF_PRINCIPLED direct",
+      "mean_rgb": [
+        0.055167039235432945,
+        0.11619080437554254,
+        0.2111377716064453
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "BSDF_PRINCIPLED zero deposits",
+      "mean_rgb": [
+        0.055167039235432945,
+        0.11619080437554254,
+        0.2111377716064453
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "MIX_SHADER direct",
+      "mean_rgb": [
+        0.14921273125542533,
+        0.30050362481011283,
+        0.5288043551974826
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "MIX_SHADER zero deposits",
+      "mean_rgb": [
+        0.14921273125542533,
+        0.30050362481011283,
+        0.5288043551974826
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "Coverage 1 first incoming surface",
+      "mean_rgb": [
+        0.12534968058268228,
+        0.10591930813259548,
+        0.07601886325412327
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "Coverage 1 second incoming surface",
+      "mean_rgb": [
+        0.12534968058268228,
+        0.10591930813259548,
+        0.07601886325412327
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "Coverage 0.5 first incoming surface",
+      "mean_rgb": [
+        0.16259871588812935,
+        0.25293392605251735,
+        0.3879407246907552
+      ]
+    },
+    {
+      "engine": "BLENDER_EEVEE",
+      "check": "Coverage 0.5 second incoming surface",
+      "mean_rgb": [
+        0.46257570054796004,
+        0.1028946770562066,
+        0.13794411553276908
+      ]
+    }
+  ],
+  "contract": "Zero coverage preserves arbitrary shader; full coverage replaces it; partial coverage blends."
+}

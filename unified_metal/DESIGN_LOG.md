@@ -98,3 +98,53 @@ and Eevee galleries. `validation.json` records the checks for the delivered buil
 6. A dedicated Material Properties panel only if the native group interface becomes
    cumbersome; no add-on requirement in v1.
 7. Measured optical presets, broader alloy coverage, and shader performance tuning.
+
+
+## v2: split finish implementations and share imperfections
+
+This update supersedes the v1 all-finish dropdown and procedural scratch scheme.
+
+1. Split Polished, Brushed, Cast, Stonewashed and Machined into separate material
+   groups. Build only the selected finish pattern. Keep the base-metal palette
+   shared because those choices have the same implementation. Keep Custom Metal
+   as an advanced isotropic authoring material with direct metal color.
+2. Expose 7-10 relevant inputs per everyday material. Replace Texture Size and
+   Wear Level presets with direct scale/amount controls, combine scratch/smudge
+   strengths under Surface Wear, and make zero disable dust/oil. Hide low-level
+   tuning and diagnostic outputs inside the material core.
+3. Reuse shared.surface_finish.build_group for the exact wood/FRP scratch,
+   smudge and surface-dust masks. Consume masks on bare metal rather than attach
+   a clear-paint coat. Preserve metal cavity accumulation, edge polishing and
+   oil in one adapter shared by every finish. The shared builder itself remains
+   unchanged, so this update does not require rebuilding wood or FRP.
+4. Use the existing shared Non-Color scratch image instead of stretched-noise
+   scratches. Retain the existing oil image. Pack both and embed the shared
+   source alongside the generator; use existing packed images on regeneration.
+5. Keep turning marks shallow by removing machining height entirely and varying
+   color, roughness and anisotropy. Rotate tangents with inverse Euler rotation,
+   transform to world space and project onto the surface with stable fallbacks.
+   Use a circumferential tangent for turning bands. Grain size does not scale
+   damage, oil patches or geometric wear distances.
+6. Rebuild the blend and Cycles gallery in the installed Blender 5.2. Test actual
+   rendered channels, including public-wrapper controls and shared mask parity,
+   then render the Eevee gallery. Clear test-node links before replacing its
+   node_tree: Blender can preserve links by socket identifier across unrelated
+   groups, which otherwise contaminates wrapper checks.
+7. Keep ordinary materials with fake users and remove asset marking in this
+   generator, consistent with the requested append-based material workflow.
+
+The code now omits unrelated finish branches from each structure. This is an
+interface and organization optimization; no render-speed improvement is claimed.
+Existing v1 materials in other files are not migrated automatically: append the
+new family material and transfer the relevant settings using the README.
+
+
+## Shared marks and final deposits
+
+Separated masks from shader response in shared/surface_finish.py. Surface Marks
+outputs scratches/smudges for material-specific shading before the BSDF. Surface
+Deposits accepts the final shader and mixes dust above it, with optional external
+coverage for metal cavities. Both use one procedural patch-field implementation.
+Bakelite uses only procedural deposits, defaulting to zero dust. Regenerated the
+four consuming blend files and tested material behavior plus arbitrary-shader
+passthrough, full coverage and partial blending in Cycles and Eevee.

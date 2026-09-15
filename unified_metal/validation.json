@@ -1,8 +1,89 @@
 {
   "blender": "5.2.1 LTS",
-  "passed": 22,
-  "packed_image": true,
-  "native_menu_evaluation": true,
+  "passed": true,
+  "check_count": 36,
+  "public_inputs": {
+    "Polished": [
+      "Base Metal",
+      "Color Tint",
+      "Roughness",
+      "Edge Wear",
+      "Surface Wear",
+      "Dust",
+      "Oil"
+    ],
+    "Brushed": [
+      "Base Metal",
+      "Color Tint",
+      "Roughness",
+      "Grain Scale",
+      "Direction",
+      "Edge Wear",
+      "Surface Wear",
+      "Dust",
+      "Oil"
+    ],
+    "Cast": [
+      "Base Metal",
+      "Color Tint",
+      "Roughness",
+      "Grain Scale",
+      "Surface Detail",
+      "Edge Wear",
+      "Surface Wear",
+      "Dust",
+      "Oil"
+    ],
+    "Stonewashed": [
+      "Base Metal",
+      "Color Tint",
+      "Roughness",
+      "Grain Scale",
+      "Surface Detail",
+      "Edge Wear",
+      "Surface Wear",
+      "Dust",
+      "Oil"
+    ],
+    "Machined": [
+      "Base Metal",
+      "Color Tint",
+      "Roughness",
+      "Grain Scale",
+      "Direction",
+      "Surface Detail",
+      "Edge Wear",
+      "Surface Wear",
+      "Dust",
+      "Oil"
+    ],
+    "Custom": [
+      "Metal Color",
+      "Roughness",
+      "Grain mm",
+      "Surface Detail",
+      "Relief mm",
+      "Anisotropy",
+      "Direction",
+      "Finish Seed",
+      "Edge Wear",
+      "Wear Width mm",
+      "Surface Wear",
+      "Scratch Tile mm",
+      "Scratch Depth mm",
+      "Dust",
+      "Dust Color",
+      "Dust Spread mm",
+      "Oil",
+      "Oil Patch mm",
+      "Oil Tint",
+      "Imperfection Seed",
+      "Scene Unit m"
+    ]
+  },
+  "separate_finish_groups": 6,
+  "shared_imperfections": true,
+  "packed_images": 2,
   "checks": [
     {
       "check": "Base Steel",
@@ -37,103 +118,55 @@
       ]
     },
     {
-      "check": "Custom metal",
+      "check": "Polished finish roughness",
       "mean_rgb": [
-        0.20000000298023224,
-        0.30000001192092896,
-        0.4000000059604645
+        0.12009177760531504,
+        0.12009177760531504,
+        0.12009177760531504
       ]
     },
     {
-      "check": "Preset after custom",
+      "check": "Brushed finish roughness",
       "mean_rgb": [
-        0.550000011920929,
-        0.5799999833106995,
-        0.6000000238418579
+        0.3199391799668471,
+        0.3199391799668471,
+        0.3199391799668471
       ]
     },
     {
-      "check": "Finish Polished",
+      "check": "Cast finish roughness",
       "mean_rgb": [
-        0.11994321036036126,
-        0.11994321036036126,
-        0.11994321036036126
+        0.6800917858878771,
+        0.6800917858878771,
+        0.6800917858878771
       ]
     },
     {
-      "check": "Finish Brushed",
+      "check": "Stonewashed finish roughness",
       "mean_rgb": [
-        0.3208673510234803,
-        0.3208673510234803,
-        0.3208673510234803
+        0.455466468559785,
+        0.455466468559785,
+        0.455466468559785
       ]
     },
     {
-      "check": "Finish Cast",
+      "check": "Machined finish roughness",
       "mean_rgb": [
-        0.6799432197585702,
-        0.6799432197585702,
-        0.6799432197585702
+        0.2205182081605825,
+        0.2205182081605825,
+        0.2205182081605825
       ]
     },
     {
-      "check": "Finish Stonewashed",
+      "check": "Custom finish roughness",
       "mean_rgb": [
-        0.45461056975182146,
-        0.45461056975182146,
-        0.45461056975182146
+        0.350091773757918,
+        0.350091773757918,
+        0.350091773757918
       ]
     },
     {
-      "check": "Finish Machined",
-      "mean_rgb": [
-        0.22051083837868646,
-        0.22051083837868646,
-        0.22051083837868646
-      ]
-    },
-    {
-      "check": "Finish Custom",
-      "mean_rgb": [
-        0.3699432174907997,
-        0.3699432174907997,
-        0.3699432174907997
-      ]
-    },
-    {
-      "check": "Size Fine",
-      "mean_rgb": [
-        0.6798385356087238,
-        0.6798385356087238,
-        0.6798385356087238
-      ]
-    },
-    {
-      "check": "Size Medium",
-      "mean_rgb": [
-        0.6799432197585702,
-        0.6799432197585702,
-        0.6799432197585702
-      ]
-    },
-    {
-      "check": "Size Coarse",
-      "mean_rgb": [
-        0.6800661915913224,
-        0.6800661915913224,
-        0.6800661915913224
-      ]
-    },
-    {
-      "check": "Size Custom",
-      "mean_rgb": [
-        0.6799432197585702,
-        0.6799432197585702,
-        0.6799432197585702
-      ]
-    },
-    {
-      "check": "Disabled Oil Mask",
+      "check": "Machining marks have no height",
       "mean_rgb": [
         0.0,
         0.0,
@@ -141,7 +174,55 @@
       ]
     },
     {
-      "check": "Disabled Dust Mask",
+      "check": "Strong machining detail still has no height",
+      "mean_rgb": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "Machining marks modulate color",
+      "mean_rgb": [
+        0.9191708677551813,
+        0.9191708677551813,
+        0.9191708677551813
+      ]
+    },
+    {
+      "check": "Machining anisotropy",
+      "mean_rgb": [
+        0.40259105194773936,
+        0.40259105194773936,
+        0.40259105194773936
+      ]
+    },
+    {
+      "check": "Zero machining detail removes color marks",
+      "mean_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "check": "Zero machining detail restores uniform anisotropy",
+      "mean_rgb": [
+        0.4000000059604645,
+        0.4000000059604645,
+        0.4000000059604645
+      ]
+    },
+    {
+      "check": "Rotated brush tangent follows surface in world space",
+      "mean_rgb": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "check": "Disabled Wear Mask",
       "mean_rgb": [
         0.0,
         0.0,
@@ -157,7 +238,7 @@
       ]
     },
     {
-      "check": "Disabled Wear Mask",
+      "check": "Disabled Smudge Mask",
       "mean_rgb": [
         0.0,
         0.0,
@@ -165,19 +246,131 @@
       ]
     },
     {
-      "check": "Enabled oil",
+      "check": "Disabled Dust Mask",
       "mean_rgb": [
-        0.0823520696143305,
-        0.0823520696143305,
-        0.0823520696143305
+        0.0,
+        0.0,
+        0.0
       ]
     },
     {
-      "check": "Enabled upward dust",
+      "check": "Disabled Oil Mask",
       "mean_rgb": [
-        0.06661554134916514,
-        0.06661554134916514,
-        0.06661554134916514
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "Shared image scratches enabled",
+      "mean_rgb": [
+        0.002617925656567636,
+        0.002617925656567636,
+        0.002617925656567636
+      ]
+    },
+    {
+      "check": "Shared handling smudges enabled",
+      "mean_rgb": [
+        0.8385459642029471,
+        0.8385459642029471,
+        0.8385459642029471
+      ]
+    },
+    {
+      "check": "Marks alter bare metal roughness",
+      "mean_rgb": [
+        0.40101821477421457,
+        0.40101821477421457,
+        0.40101821477421457
+      ]
+    },
+    {
+      "check": "Shared upward dust enabled",
+      "mean_rgb": [
+        0.8385693861895965,
+        0.8385693861895965,
+        0.8385693861895965
+      ]
+    },
+    {
+      "check": "Independent image oil enabled",
+      "mean_rgb": [
+        0.1696617691502777,
+        0.1696617691502777,
+        0.1696617691502777
+      ]
+    },
+    {
+      "check": "Metal and shared scratch masks agree",
+      "mean_rgb": [
+        0.002617925656567636,
+        0.002617925656567636,
+        0.002617925656567636
+      ]
+    },
+    {
+      "check": "Public color tint",
+      "mean_rgb": [
+        0.2750000059604645,
+        0.28999999165534973,
+        0.30000001192092896
+      ]
+    },
+    {
+      "check": "Public roughness",
+      "mean_rgb": [
+        0.41009177665950525,
+        0.41009177665950525,
+        0.41009177665950525
+      ]
+    },
+    {
+      "check": "Public detail disables cast relief",
+      "mean_rgb": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "Public grain scale 2",
+      "mean_rgb": [
+        0.012488090664394096,
+        0.012488090664394096,
+        0.012488090664394096
+      ]
+    },
+    {
+      "check": "Centimeter scene point",
+      "mean_rgb": [
+        0.015747614204883575,
+        0.015747614204883575,
+        0.015747614204883575
+      ]
+    },
+    {
+      "check": "Equivalent meter scene point",
+      "mean_rgb": [
+        0.015747617930173874,
+        0.015747617930173874,
+        0.015747617930173874
+      ]
+    },
+    {
+      "check": "Scratches at grain scale 2",
+      "mean_rgb": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "Scratches at grain scale 0.5",
+      "mean_rgb": [
+        0.0,
+        0.0,
+        0.0
       ]
     }
   ],

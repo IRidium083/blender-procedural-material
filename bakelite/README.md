@@ -27,7 +27,7 @@ patterns wrap onto curved surfaces. Close-ups cover approximately 65 mm:
 - [Type 2 detail](bakelite_type2_detail.png)
 - [Eevee gallery](bakelite_eevee.png)
 
-## Eight controls
+## Controls
 
 | Control | Purpose |
 | --- | --- |
@@ -39,6 +39,7 @@ patterns wrap onto curved surfaces. Close-ups cover approximately 65 mm:
 | Seed | Change pattern placement |
 | Roughness | Average surface roughness, with subtle procedural variation |
 | Polish | Strength of the smooth resin-skin highlight; 0 removes the extra coat lobe |
+| Dust | Optional shared procedural surface deposits; default 0 |
 
 Apply object scale with Ctrl+A > Scale. At scene Unit Scale 1, a 20 cm object
 should measure 0.2 Blender units. Increasing object dimensions adds pattern
@@ -67,7 +68,7 @@ noise. Thresholds make thin, irregular strands with broad flow bends rather than
 regular wave bands. This structure is independent of the Type 1 packet graph.
 
 The patterns affect base color beneath a smooth nonmetallic resin surface.
-The shared finish adds uneven roughness and a microscopic 0.003 mm mold texture;
+The shared finish adds uneven roughness, optional procedural dust, and a microscopic 0.003 mm mold texture;
 the filler patterns do not become carved grooves. A modest Principled coat lobe
 approximates a polished resin skin. This is an opaque appearance shader, not a
 chemical composition or subsurface filler simulation.
@@ -89,7 +90,7 @@ $blender = 'C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe'
 ```
 
 Running bakelite.py with selected meshes assigns Type 1. Preview generation saves
-the gallery, embeds the generator and shared resin source, and renders the gallery
+the gallery, embeds the generator, shared resin and shared surface module sources, and renders the gallery
 plus two detail images. Tests render numeric Cycles samples and the Eevee gallery,
 then write validation.json without overwriting the saved scene.
 
