@@ -27,6 +27,7 @@ Shared root files:
 
 - `test.blend`: reusable base scene for generating previews.
 - `preview_utils.py`: common studio lights, camera placement, and render settings.
+- `render_utils.py`: GPU-first Cycles configuration; prefers OptiX and falls back to CPU if needed.
 - `shared/resin_finish.py`: procedural molded-resin shading and optional deposits for both Bakelite patterns.
 - `shared/surface_finish.py`: shared surface marks, shader-in/shader-out deposits and material finish adapters.
 - `.gitignore` and `.gitattributes`: repository settings.
@@ -43,3 +44,16 @@ $blender = 'C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe'
 Preview generation adjusts the sample's bevel, lights, and camera. Painted-metal
 testing updates its saved scene and renders Cycles, Eevee, and a clean comparison.
 Machined metal testing renders Eevee without changing the saved Cycles scene.
+
+## Cycles GPU default
+
+Preview generators now select GPU Compute when a compatible GPU is available.
+The shared render helper prefers OptiX, then CUDA/HIP/oneAPI/Metal, and uses CPU
+when no supported device is detected. On this workstation it selects the RTX 4070
+with OptiX. Newly generated preview blends store their selected device.
+Previously saved blends keep their scene device setting until regenerated or
+changed in Render Properties. Tiny numeric tests intentionally use CPU Cycles.
+
+The machine's Blender Cycles compute preference has also been saved to OptiX.
+An already open Blender session may need its preference changed or a restart to
+load it. This does not replace the user's startup scene or other preferences.

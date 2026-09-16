@@ -45,3 +45,17 @@ if that scene was already open in the UI.
 4. Pack image dependencies and keep embedded scripts synchronized with source.
 5. Save the scene, update documentation, and commit source and outputs together.
    Reuse materials through File > Append > the scene file > Material.
+
+
+## Cycles rendering device
+
+Preview generators call the root render_utils.configure_cycles helper. It chooses
+OptiX first (RTX 4070 on this workstation), then other available GPU backends,
+and falls back to CPU when none is available. It enables only the chosen backend's
+GPU devices and saves the generated preview scene with GPU Compute. The helper
+is embedded in newly generated blends for Text Editor regeneration.
+
+Machine-wide Cycles device preferences were saved as OptiX without replacing the
+startup scene. Existing open sessions may need to reload those preferences.
+Previously saved material blends retain their device setting until regenerated.
+Small numerical validation scenes stay on CPU to avoid GPU setup overhead.

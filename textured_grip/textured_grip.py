@@ -12,6 +12,17 @@ import sys
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0,str(Path(__file__).resolve().parent.parent))
+try:
+    from render_utils import configure_cycles
+except ModuleNotFoundError:
+    _render_namespace = {'__name__':'render_utils'}
+    _render_source = bpy.data.texts.get('render_utils.py')
+    if _render_source is None:
+        raise RuntimeError('Keep render_utils.py in the material repository root.')
+    exec(_render_source.as_string(),_render_namespace)
+    configure_cycles = _render_namespace['configure_cycles']
+
 DETAIL_IMAGE = "Molded Grip Height"
 
 
@@ -268,7 +279,7 @@ def make_preview(directory, render):
     camera.location = (3.4, -6.5, 3)
     camera.rotation_euler = (Vector((0, 0, 0)) - camera.location).to_track_quat("-Z", "Y").to_euler()
     camera.data.type, camera.data.ortho_scale = "ORTHO", 4.25
-    scene.render.engine = "CYCLES"
+    configure_cycles(scene)
     scene.cycles.samples, scene.cycles.use_denoising = 64, True
     scene.render.resolution_x, scene.render.resolution_y = 1100, 1000
     scene.render.resolution_percentage = 100

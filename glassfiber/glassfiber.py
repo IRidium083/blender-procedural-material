@@ -9,6 +9,17 @@ import sys
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0,str(Path(__file__).resolve().parent.parent))
+try:
+    from render_utils import configure_cycles
+except ModuleNotFoundError:
+    _render_namespace = {'__name__':'render_utils'}
+    _render_source = bpy.data.texts.get('render_utils.py')
+    if _render_source is None:
+        raise RuntimeError('Keep render_utils.py in the material repository root.')
+    exec(_render_source.as_string(),_render_namespace)
+    configure_cycles = _render_namespace['configure_cycles']
+
 DIRECTORY = Path(__file__).resolve().parent
 sys.path.insert(0, str(DIRECTORY.parent))
 try:
@@ -248,7 +259,7 @@ def preview(render):
     cam.rotation_euler = (Vector((0,0.015,0))-cam.location).to_track_quat('-Z','Y').to_euler()
     cam.data.type, cam.data.ortho_scale, cam.data.clip_start = 'ORTHO',0.4,0.001
     scene.camera = cam
-    scene.render.engine = 'CYCLES'
+    configure_cycles(scene)
     scene.cycles.samples, scene.cycles.use_denoising = 64, True
     scene.view_settings.exposure = -0.7
     scene.render.resolution_x = scene.render.resolution_y = 1200

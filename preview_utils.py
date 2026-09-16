@@ -1,9 +1,10 @@
 """Shared studio lighting and camera setup for material previews."""
 import bpy
 from mathutils import Vector
+from render_utils import configure_cycles
 
 def setup_studio(scene, target):
-    scene.render.engine = "CYCLES"
+    configure_cycles(scene)
     scene.cycles.samples = 48
     scene.cycles.use_denoising = True
     scene.render.resolution_x = scene.render.resolution_y = 800

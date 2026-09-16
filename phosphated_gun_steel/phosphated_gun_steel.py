@@ -12,6 +12,17 @@ import sys
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0,str(Path(__file__).resolve().parent.parent))
+try:
+    from render_utils import configure_cycles
+except ModuleNotFoundError:
+    _render_namespace = {'__name__':'render_utils'}
+    _render_source = bpy.data.texts.get('render_utils.py')
+    if _render_source is None:
+        raise RuntimeError('Keep render_utils.py in the material repository root.')
+    exec(_render_source.as_string(),_render_namespace)
+    configure_cycles = _render_namespace['configure_cycles']
+
 NAME = "Phosphated Gun Steel - Slightly Used"
 DETAIL_IMAGE = "Phosphate Microdetail"
 
@@ -258,7 +269,7 @@ def make_preview(mat, directory, render):
     camera.location = (3.8, -5.8, 3.4)
     camera.rotation_euler = (Vector((0, 0, 0.1)) - camera.location).to_track_quat("-Z", "Y").to_euler()
     camera.data.type, camera.data.ortho_scale = "ORTHO", 4.2
-    scene.render.engine = "CYCLES"
+    configure_cycles(scene)
     scene.cycles.samples = 64
     scene.cycles.use_denoising = True
     scene.render.resolution_x, scene.render.resolution_y = 1100, 850
