@@ -8,15 +8,16 @@ for controls and any bundled texture assets.
 
 | Material | Files | Preview |
 | --- | --- | --- |
-| Bakelite (two procedural patterns) | [Controls and reference notes](bakelite/README.md) | [Cycles gallery](bakelite/bakelite_preview.png) |
-| Fiberglass reinforced plastic | [Controls and usage](glassfiber/README.md) | [Cycles gallery](glassfiber/glassfiber_preview.png) |
-| Procedural wood and plywood | [Controls and design](wood/README.md) | [Cycles gallery](wood/wood_preview.png) |
-| Unified modular metal | [Presets and design](unified_metal/README.md) | [Cycles gallery](unified_metal/unified_metal_preview.png) |
-| Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | [Cycles](worn_painted_metal/recessed_metal_cycles.png) |
-| Machined metal | [Guide and controls](machined_metal/README.md) | [Cycles](machined_metal/machined_metal_preview.png) |
-| Textured plastic / hard rubber grip | [Guide and presets](textured_grip/README.md) | [Preview](textured_grip/textured_grip_preview.png) |
-| Phosphated gun steel | [Guide and controls](phosphated_gun_steel/README.md) | [Preview](phosphated_gun_steel/phosphated_gun_steel_preview.png) |
-| Oily polished machinery steel | [Guide and controls](oily_polished_steel/README.md) | [Preview](oily_polished_steel/oily_polished_steel_preview.png) |
+| Hammertone paint | [Controls and structure](hammertone/README.md) | ![Hammertone paint preview](hammertone/hammertone_preview.png) |
+| Bakelite (two procedural patterns) | [Controls and reference notes](bakelite/README.md) | ![Bakelite (two procedural patterns) preview](bakelite/bakelite_preview.png) |
+| Fiberglass reinforced plastic | [Controls and usage](glassfiber/README.md) | ![Fiberglass reinforced plastic preview](glassfiber/glassfiber_preview.png) |
+| Procedural wood and plywood | [Controls and design](wood/README.md) | ![Procedural wood and plywood preview](wood/wood_preview.png) |
+| Unified modular metal | [Presets and design](unified_metal/README.md) | ![Unified modular metal preview](unified_metal/unified_metal_preview.png) |
+| Worn painted metal | [Guide and controls](worn_painted_metal/README.md) | ![Worn painted metal preview](worn_painted_metal/recessed_metal_cycles.png) |
+| Machined metal | [Guide and controls](machined_metal/README.md) | ![Machined metal preview](machined_metal/machined_metal_preview.png) |
+| Textured plastic / hard rubber grip | [Guide and presets](textured_grip/README.md) | ![Textured plastic / hard rubber grip preview](textured_grip/textured_grip_preview.png) |
+| Phosphated gun steel | [Guide and controls](phosphated_gun_steel/README.md) | ![Phosphated gun steel preview](phosphated_gun_steel/phosphated_gun_steel_preview.png) |
+| Oily polished machinery steel | [Guide and controls](oily_polished_steel/README.md) | ![Oily polished machinery steel preview](oily_polished_steel/oily_polished_steel_preview.png) |
 
 Each material folder contains its generator, saved `.blend`, and render previews.
 Painted metal and machined metal also include test scripts. Open its `.blend` to inspect or append the material, or open

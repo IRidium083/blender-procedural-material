@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "blender": "5.2.2 LTS",
+  "checks": [
+    {
+      "check": "Hammered cells vary across the paint",
+      "mean": 0.6268278794891052
+    },
+    {
+      "check": "Default relief is 128 micrometers",
+      "mean": 0.12800000607967377
+    },
+    {
+      "check": "Hammer zero removes relief",
+      "mean": 0.0
+    },
+    {
+      "check": "Hammer zero removes pigment pattern",
+      "mean": 0.07500000298023224
+    },
+    {
+      "check": "Hammer zero and smudges zero give requested roughness",
+      "mean": 0.30000001192092896
+    },
+    {
+      "check": "Smudges disabled",
+      "mean": 0.0
+    },
+    {
+      "check": "Dust disabled",
+      "mean": 0.0
+    },
+    {
+      "check": "Shared smudges respond",
+      "mean": 0.48934568702194764
+    },
+    {
+      "check": "Shared dust responds",
+      "mean": 0.48934568702194764
+    },
+    {
+      "check": "Larger cell size changes the pattern",
+      "mean": 0.6270496856599392
+    },
+    {
+      "check": "Object dimensions and cell size scale consistently",
+      "mean": 0.6268278794891052
+    },
+    {
+      "check": "Centimeter scene units preserve physical pattern",
+      "mean": 0.6268278859719835
+    }
+  ],
+  "materials": [
+    "Hammertone - Blue",
+    "Hammertone - Green",
+    "Hammertone - Silver"
+  ],
+  "public_inputs": [
+    "Paint Color",
+    "Cell Size mm",
+    "Hammer Amount",
+    "Roughness",
+    "Metallic Sheen",
+    "Gloss Coat",
+    "Smudges",
+    "Dust"
+  ],
+  "procedural": true,
+  "embedded_source_fallback": true,
+  "saved_cycles_device": "GPU",
+  "renderers": [
+    "Cycles",
+    "Eevee"
+  ]
+}
