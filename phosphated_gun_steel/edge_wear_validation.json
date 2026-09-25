@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "cycles": {
+    "sharp": {
+      "max": 0.8973610401153564,
+      "mean": 0.006862365747121109,
+      "lit_fraction": 0.033776199172349086,
+      "lit_range": 0.8673500828444958
+    },
+    "smooth": {
+      "max": 0.0,
+      "mean": 0.0,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    },
+    "rounded": {
+      "max": 0.0015316795324906707,
+      "mean": 2.469538414257183e-07,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    },
+    "concave": {
+      "max": 0.0,
+      "mean": 0.0,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    }
+  },
+  "eevee": {
+    "sharp": {
+      "max": 0.6943359375,
+      "mean": 0.021270624170701375,
+      "lit_fraction": 0.09251691565619348,
+      "lit_range": 0.6643218994140625
+    },
+    "smooth": {
+      "max": 0.0,
+      "mean": 0.0,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    },
+    "rounded": {
+      "max": 0.0,
+      "mean": 0.0,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    },
+    "concave": {
+      "max": 0.0,
+      "mean": 0.0,
+      "lit_fraction": 0.0,
+      "lit_range": 0
+    }
+  },
+  "eevee_edge_tag_angle_degrees": 45,
+  "saved_cycles_device": "GPU"
+}

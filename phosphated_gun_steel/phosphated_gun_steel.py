@@ -7,6 +7,7 @@ CLI: blender -b ../test.blend -P phosphated_gun_steel.py -- --preview --render
 Preview creates a separate sample scene and saves beside this script.
 """
 import argparse
+import math as mathlib
 from pathlib import Path
 import sys
 import bpy
@@ -24,6 +25,9 @@ except ModuleNotFoundError:
     configure_cycles = _render_namespace['configure_cycles']
 
 NAME = "Phosphated Gun Steel - Slightly Used"
+EEVEE_NAME = NAME + " - Eevee"
+EDGE_ATTRIBUTE = "gun_steel_convex_sharp_edge"
+EDGE_GROUP = "Gun Steel - Convex Sharp Edge Tags"
 DETAIL_IMAGE = "Phosphate Microdetail"
 
 
@@ -46,20 +50,65 @@ def load_microdetail():
     return image
 
 
-def make_material():
+def build_edge_tags():
+    """Tag outward edges above 45 degrees on evaluated mesh geometry."""
+    existing = bpy.data.node_groups.get(EDGE_GROUP)
+    if existing and existing.get("gun_edge_tags_version") == 1:
+        return existing
+    tree = bpy.data.node_groups.new(EDGE_GROUP, "GeometryNodeTree")
+    tree["gun_edge_tags_version"] = 1
+    tree.interface.new_socket(name="Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
+    tree.interface.new_socket(name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+    source = tree.nodes.new("NodeGroupInput")
+    result = tree.nodes.new("NodeGroupOutput")
+    angle = tree.nodes.new("GeometryNodeInputMeshEdgeAngle")
+    convex = tree.nodes.new("ShaderNodeMath")
+    # Verified in Blender 5.2 on outward/inside-out cubes: the evaluated edge
+    # angle here is positive for convex and negative for concave joins.
+    convex.operation = "GREATER_THAN"
+    convex.inputs[1].default_value = mathlib.radians(45)
+    tree.links.new(angle.outputs["Signed Angle"], convex.inputs[0])
+    store = tree.nodes.new("GeometryNodeStoreNamedAttribute")
+    store.data_type, store.domain = "FLOAT", "POINT"
+    store.inputs["Name"].default_value = EDGE_ATTRIBUTE
+    tree.links.new(source.outputs["Geometry"], store.inputs["Geometry"])
+    tree.links.new(convex.outputs[0], store.inputs["Value"])
+    tree.links.new(store.outputs["Geometry"], result.inputs["Geometry"])
+    for n, xy in ((source, (-650, 100)), (angle, (-650, -150)), (convex, (-400, -150)),
+                  (store, (-150, 100)), (result, (100, 100))):
+        n.location = xy
+    return tree
+
+
+def add_edge_tags(obj):
+    if obj.type != "MESH":
+        return
+    modifier = next((m for m in obj.modifiers if m.type == "NODES" and
+                     m.node_group and m.node_group.name == EDGE_GROUP), None)
+    if modifier is None:
+        modifier = obj.modifiers.new("Convex Edge Tags for Eevee", "NODES")
+    modifier.node_group = build_edge_tags()
+    # Keep this after bevel/subdivision modifiers so a rounded final edge is not
+    # classified from an earlier, sharp version of the mesh.
+    obj.modifiers.move(obj.modifiers.find(modifier.name), len(obj.modifiers)-1)
+
+
+def make_material(engine="CYCLES"):
+    assert engine in {"CYCLES", "EEVEE"}
     detail_image = load_microdetail()
-    mat = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
-    mat.use_nodes = True
+    material_name = NAME if engine == "CYCLES" else EEVEE_NAME
+    mat = bpy.data.materials.get(material_name) or bpy.data.materials.new(material_name)
+    mat.use_nodes = mat.use_fake_user = True
     mat.diffuse_color = (0.035, 0.041, 0.038, 1)
     mat.node_tree.nodes.clear()
-    group = bpy.data.node_groups.new(NAME, "ShaderNodeTree")
+    group = bpy.data.node_groups.new(material_name, "ShaderNodeTree")
     controls = [
         ("Meters Per Unit", "NodeSocketFloat", bpy.context.scene.unit_settings.scale_length, (0.000001, 1000)),
         ("Finish Color", "NodeSocketColor", (0.035, 0.041, 0.038, 1), None),
         ("Exposed Steel", "NodeSocketColor", (0.24, 0.27, 0.28, 1), None),
         ("Roughness", "NodeSocketFloat", 0.57, (0, 1)),
-        ("Edge Wear", "NodeSocketFloat", 0.38, (0, 1)),
-        ("Edge Width", "NodeSocketFloat", 0.0005, (0.00001, 0.05)),
+        ("Edge Wear", "NodeSocketFloat", 0.65, (0, 1)),
+        ("Edge Width", "NodeSocketFloat", 0.0012, (0.00001, 0.05)),
         ("Scratches", "NodeSocketFloat", 0.22, (0, 1)),
         ("Scratch Depth", "NodeSocketFloat", 0.00003, (0, 0.001)),
         ("Grain Depth", "NodeSocketFloat", 0.00001, (0, 0.001)),
@@ -121,12 +170,13 @@ def make_material():
     link(inp, "Meters Per Unit", metric, "Scale")
     link(metric, "Vector", scale, 0)
 
-    def distance(control, target):
+    def distance(control, target, socket="Distance"):
         convert = node("ShaderNodeMath", control + " to Scene Units", -1550, -100 - 180 * len([n for n in group.nodes if n.name.endswith("to Scene Units")]))
         convert.operation = "DIVIDE"
         link(inp, control, convert, 0)
         link(inp, "Meters Per Unit", convert, 1)
-        link(convert, 0, target, "Distance")
+        link(convert, 0, target, socket)
+        return convert
 
     link(inp, "Pattern Scale", scale, "Scale")
     mottle = noise("Subtle Phosphate Variation", scale, 5, -750, 450, 3)
@@ -157,17 +207,60 @@ def make_material():
     ao.inside = True
     ao.samples = 16
     distance("Edge Width", ao)
+    # AO supplies width; the renderer-specific signal classifies convexity.
+    sharp = node("ShaderNodeMapRange", "Sharp Edges Only", -250, -820)
+    sharp.interpolation_type = "SMOOTHSTEP"
+    sharp.clamp = True
+    if engine == "CYCLES":
+        geometry = node("ShaderNodeNewGeometry", "Mesh Curvature (Cycles)", -1000, -820)
+        sharp.inputs["From Min"].default_value = 0.56
+        sharp.inputs["From Max"].default_value = 0.67
+        link(geometry, "Pointiness", sharp, "Value")
+    else:
+        attribute = node("ShaderNodeAttribute", "Convex Edge Attribute (Eevee)", -1000, -820)
+        attribute.attribute_name = EDGE_ATTRIBUTE
+        sharp.inputs["From Min"].default_value = 0.04
+        sharp.inputs["From Max"].default_value = 0.20
+        link(attribute, "Fac", sharp, "Value")
     inverse = math("Convex Wear Mask", "SUBTRACT", -750, -600, 1)
     link(ao, "AO", inverse, 1)
     gain = math("Narrow Edge Polish", "MULTIPLY", -500, -600, b=4)
     gain.use_clamp = True
     link(inverse, 0, gain, 0)
-    irregular = math("Broken Edge Polish", "MULTIPLY", -250, -600)
+    edge_location = node("ShaderNodeVectorMath", "Wear Variation in Meters", -1250, -1400)
+    edge_location.operation = "SCALE"
+    link(metric, "Vector", edge_location, 0)
+    edge_location.inputs["Scale"].default_value = 45
+    coarse = noise("Interrupted Edge Wear", edge_location, 1, -1000, -1400, 2)
+    coarse_mask = node("ShaderNodeMapRange", "Worn and Intact Sections", -750, -1400)
+    coarse_mask.interpolation_type = "SMOOTHSTEP"
+    coarse_mask.inputs["From Min"].default_value = 0.39
+    coarse_mask.inputs["From Max"].default_value = 0.66
+    link(coarse, "Fac", coarse_mask, "Value")
+    fine_location = node("ShaderNodeVectorMath", "Small Edge Breakup in Meters", -1250, -1650)
+    fine_location.operation = "SCALE"
+    link(metric, "Vector", fine_location, 0)
+    fine_location.inputs["Scale"].default_value = 350
+    fine = noise("Fine Chipped Edge Wear", fine_location, 1, -1000, -1650, 2)
+    fine_mask = node("ShaderNodeMapRange", "Irregular Wear Boundary", -750, -1650)
+    fine_mask.interpolation_type = "SMOOTHSTEP"
+    fine_mask.inputs["From Min"].default_value = 0.27
+    fine_mask.inputs["From Max"].default_value = 0.7
+    link(fine, "Fac", fine_mask, "Value")
+    broken = math("Varied Edge Polish", "MULTIPLY", -500, -1400)
+    link(coarse_mask, "Result", broken, 0)
+    link(fine_mask, "Result", broken, 1)
+    irregular = math("Wear Only on Sharp Edges", "MULTIPLY", -250, -600)
     link(gain, 0, irregular, 0)
-    link(mottle, "Fac", irregular, 1)
+    link(sharp, "Result", irregular, 1)
+    fragments = math("Interrupted Sharp Edge Wear", "MULTIPLY", 0, -750)
+    link(irregular, 0, fragments, 0)
+    link(broken, 0, fragments, 1)
     edge = math("Edge Wear Strength", "MULTIPLY", 0, -600)
-    link(irregular, 0, edge, 0)
+    link(fragments, 0, edge, 0)
     link(inp, "Edge Wear", edge, 1)
+    group.interface.new_socket(name="Sharp Edge Mask", in_out="OUTPUT", socket_type="NodeSocketFloat")
+    group.interface.new_socket(name="Edge Wear Mask", in_out="OUTPUT", socket_type="NodeSocketFloat")
     wear = math("Light Handling Wear", "MAXIMUM", 250, -300)
     link(edge, 0, wear, 0)
     link(scratch, 0, wear, 1)
@@ -204,6 +297,8 @@ def make_material():
     link(cut, "Normal", shader, "Normal")
     out = node("NodeGroupOutput", "Surface", 1100, 450)
     link(shader, "BSDF", out, "Shader")
+    link(sharp, "Result", out, "Sharp Edge Mask")
+    link(edge, 0, out, "Edge Wear Mask")
     instance = mat.node_tree.nodes.new("ShaderNodeGroup")
     instance.node_tree = group
     instance.width = 290
@@ -213,7 +308,7 @@ def make_material():
     return mat
 
 
-def make_preview(mat, directory, render):
+def make_preview(mat, eevee_mat, directory, render):
     scene = bpy.data.scenes.new("Phosphated Steel Studio")
     bpy.context.window.scene = scene
 
@@ -238,7 +333,7 @@ def make_preview(mat, directory, render):
     bpy.data.objects.remove(cutter, do_unlink=True)
     bevel = body.modifiers.new("Small Machined Chamfer", "BEVEL")
     bevel.width, bevel.segments = 0.025, 3
-    block("Sharp Raised Rib", (0, 0.1, 0.73), (2.25, 0.35, 0.21), 0.006)
+    block("Sharp Raised Rib", (0, 0.1, 0.73), (2.25, 0.35, 0.21))
     for x in (-0.94, 0.94):
         bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.14, depth=0.06, location=(x, -0.44, 0.65))
         obj = bpy.context.object
@@ -285,29 +380,46 @@ def make_preview(mat, directory, render):
     sys.path.insert(0, str(directory.parent))
     from real_scale_utils import resize_studio
     resize_studio(scene, body, 0.2 if "Grip" in body.name else 0.28)
-    bpy.ops.wm.save_as_mainfile(filepath=str(directory / "phosphated_gun_steel.blend"))
+    samples = [obj for obj in scene.objects if obj.type == "MESH"]
+    for obj in samples:
+        add_edge_tags(obj)
     if render:
         bpy.ops.render.render(write_still=True)
+        for obj in samples:
+            obj.data.materials[0] = eevee_mat
+        scene.render.engine = "BLENDER_EEVEE"
+        scene.render.filepath = str(directory / "phosphated_gun_steel_eevee.png")
+        bpy.ops.render.render(write_still=True)
+        for obj in samples:
+            obj.data.materials[0] = mat
+        configure_cycles(scene)
+        scene.render.filepath = str(directory / "phosphated_gun_steel_preview.png")
+    bpy.ops.wm.save_as_mainfile(filepath=str(directory / "phosphated_gun_steel.blend"))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--preview", action="store_true")
     parser.add_argument("--render", action="store_true")
+    parser.add_argument("--eevee", action="store_true", help="Assign the Eevee material and convex-edge Geometry Nodes tag.")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     targets = [o for o in bpy.context.selected_objects if o.type == "MESH"]
     if not args.preview and not targets:
         raise RuntimeError("Select at least one mesh to assign the material.")
-    mat = make_material()
+    eevee = args.eevee or (not args.preview and bpy.context.scene.render.engine == "BLENDER_EEVEE")
+    mat = make_material("EEVEE" if eevee and not args.preview else "CYCLES")
     if args.preview:
-        make_preview(mat, Path(__file__).resolve().parent, args.render)
+        eevee_mat = make_material("EEVEE")
+        make_preview(mat, eevee_mat, Path(__file__).resolve().parent, args.render)
     else:
         for obj in targets:
             if obj.data.materials:
                 obj.data.materials[obj.active_material_index] = mat
             else:
                 obj.data.materials.append(mat)
-    print(f"Created {NAME}; Blender {bpy.app.version_string}")
+            if eevee:
+                add_edge_tags(obj)
+    print(f"Created {mat.name}; Blender {bpy.app.version_string}")
 
 
 if __name__ == "__main__":
